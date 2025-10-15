@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Weights and Biases
+*.pt
+
+# Data and Logs
+data/
+wandb/
+checkpoints/
