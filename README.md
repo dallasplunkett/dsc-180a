@@ -1,29 +1,42 @@
-## Usage (WIP)
+### Usage
 
-1. Build the container.
+__Step 1:__ Clone the repo and cd into it.
+
+```bash
+git clone https://github.com/dallasplunkett/dsc-180a.git && cd dsc-180a
+```
+
+__Step 2:__ Create a `data/` folder in the repo's root that contains the `.csv` and `.hdf5` files. Your folder should look something like this:
+
+```
+dsc-180a/
+├── .dockerignore
+├── .gitignore
+├── Dockerfile
+├── main.py
+├── README.md
+├── requirements.txt
+└── data/
+    ├── train.csv
+    ├── validation.csv
+    ├── images_1.hdf5
+    ├── images_2.hdf5
+    └── ...
+```
+
+__Step 3:__ Build the container.
 
 ```bash
 docker build -t bnpp-trainer .
 ```
 
-1. Create a `data` directory containing the `.csv` and `.hdf5` files in the project's root directory.
-
-2. Add your Weights and Biases API key to your `.bashrc` or `.zshrc` and refresh it with source.
-
-```bash
-export WANDB_API_KEY=your_actual_key_here
-```
-
-```bash
-source ~/.zshrc
-```
-
-4. Run the container.
+__Step 4:__ Run the container.
 
 ```bash
 docker run -it \
-  -v ~Downloads/data:/app/data \
-  -e WANDB_API_KEY=$WANDB_API_KEY \
-  --memory=0 \
+  --shm-size=8g
+  -v "$(pwd)/data:/app/data" \
   bnpp-trainer
 ```
+
+__Step 5:__ Follow the logs.
