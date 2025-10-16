@@ -12,6 +12,7 @@ __pycache__/
 
 # Weights and Biases
 *.pt
+*.pth
 
 # Data and Logs
 data/

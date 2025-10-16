@@ -1,5 +1,5 @@
 # --- base image ---
-FROM python:3.11-slim
+FROM python:3.11-slim-bullseye
 
 # --- system setup ---
 WORKDIR /app
@@ -11,7 +11,8 @@ RUN apt-get update && \
 
 # --- copy and install dependencies ---
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+    --extra-index-url https://download.pytorch.org/whl/cpu
 
 # --- copy code ---
 COPY main.py .

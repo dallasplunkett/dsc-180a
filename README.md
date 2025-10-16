@@ -33,9 +33,12 @@ docker build -t bnpp-trainer .
 __Step 4:__ Run the container.
 
 ```bash
-docker run -it \
-  --shm-size=8g
-  -v "$(pwd)/data:/app/data" \
+docker run -it --rm \
+  --cpus=8 \
+  --memory=8g \
+  --shm-size=8g \
+  -v "$(pwd)/data:/app/data:ro" \
+  -v "$(pwd)/wandb:/app/wandb" \
   bnpp-trainer
 ```
 
