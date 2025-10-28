@@ -8,9 +8,6 @@ from src.model import make_model
 from src.train import Trainer
 import torch, wandb
 
-from scipy.stats import pearsonr
-import numpy as np
-
 import pandas as pd, numpy as np, matplotlib.pyplot as plt
 from src.plots import scatter, select_examples, plot_examples_from_df
 
@@ -52,10 +49,6 @@ if __name__ == "__main__":
     pred_df["y_pred"] = np.power(10.0, pred_df["y_pred_log"]) - 1
     pred_df["abs_diff_log"] = (pred_df["y_true_log"] - pred_df["y_pred_log"]).abs()
     pred_df["abs_diff"] = (pred_df["y_true"] - pred_df["y_pred"]).abs()
-
-    r_log, _ = pearsonr(y_true_log, y_pred_log)
-    r_lin, _ = pearsonr(np.power(10, y_true_log) - 1, np.power(10, y_pred_log) - 1)
-    print(f"log-space r: {r_log:.3f}, linear-space r: {r_lin:.3f}")
 
     wandb.log({"predictions_table": wandb.Table(dataframe=pred_df)})
 

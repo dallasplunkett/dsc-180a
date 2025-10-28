@@ -13,10 +13,10 @@ class Config:
     test_csv: Path = Path("data/test.csv")
 
     # Model + training
-    size: int = 512
+    size: int = 1024
     val_frac: float = 0.30
     batch_size: int = 16
-    epochs: int = 50
+    epochs: int = 30
     lr: float = 1e-5
     weight_decay: float = 1e-5
 
