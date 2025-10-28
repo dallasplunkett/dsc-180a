@@ -6,22 +6,22 @@ __Step 1:__ Clone the repo and cd into it.
 git clone https://github.com/dallasplunkett/dsc-180a.git && cd dsc-180a
 ```
 
-__Step 2:__ Create a `data/` folder in the repo's root that contains the `.csv` and `.hdf5` files. Your folder should look something like this:
+__Step 2:__ Inside `config.py` update the `data_dir` to reflect where the *.hdf5 files are contained. Then update the `train_csv` and `test_csv` to specify the csv's specific paths. Below is where we have placed the directories and files along with their names.
 
 ```
 dsc-180a/
-├── .dockerignore
-├── .gitignore
-├── Dockerfile
-├── main.py
-├── README.md
-├── requirements.txt
-└── data/
-    ├── train.csv
-    ├── validation.csv
-    ├── images_1.hdf5
-    ├── images_2.hdf5
-    └── ...
+    ...
+    main.py
+    data/
+        train.csv
+        test.csv
+        images_1.hdf5
+        images_2.hdf5
+        ...
+    src/
+        config.py
+        data.py
+        ...
 ```
 
 __Step 3:__ Build the container.

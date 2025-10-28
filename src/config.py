@@ -8,9 +8,9 @@ class Config:
     seed: int | None = None
 
     # Data paths
-    data_dir: Path = Path("data")
-    train_csv: Path = Path("data/train.csv")
-    test_csv: Path = Path("data/test.csv")
+    data_dir: Path = Path("data")               # for *.hdf5 loading to work
+    train_csv: Path = Path("data/train.csv")    # for training labels
+    test_csv: Path = Path("data/test.csv")      # for testing labels
 
     # Model + training
     size: int = 1024
