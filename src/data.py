@@ -4,38 +4,21 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 import torch.nn.functional as F
 
-# --- Image helpers ---
+def resize(cfg, x):
+    return F.interpolate(
+        x.unsqueeze(0),
+        size=(cfg.size, cfg.size),
+        mode="bilinear",
+        align_corners=False
+    ).squeeze(0)
+
 def normalize(x):
     return (x - x.min()) / torch.clamp(x.max() - x.min(), min=1e-6)
 
-def resize(x, size):
-    return F.interpolate(x.unsqueeze(0), size=size, mode="bilinear", align_corners=False).squeeze(0)
-
-def transform_fn(x, size):
-    """Top-level transform (picklable)"""
-    return normalize(resize(x, (size, size)))
-
-# --- CSV + HDF5 scanning ---
-def get_labels(csv_path, data_dir):
-    df = pd.read_csv(csv_path, usecols=["unique_key", "bnpp_value_log"])
-    df.columns = ["id", "bnpp_log"]
-    df = df.astype({"id": str, "bnpp_log": "float32"})
-
-    files = [f for f in Path(data_dir).glob("*.hdf5")]
-    rows, id_set = [], set(df["id"])
-    for path in files:
-        with h5py.File(path, "r") as f:
-            for key in f.keys():
-                if key in id_set:
-                    rows.append({"id": key, "h5path": str(path)})
-
-    return df.merge(pd.DataFrame(rows), on="id", how="inner")
-
-# --- Dataset with caching ---
 class Image(Dataset):
-    def __init__(self, df, size):
+    def __init__(self, cfg, df):
         self.df = df.reset_index(drop=True)
-        self.size = size
+        self.cfg = cfg
         self.file_cache = {}
 
     def __len__(self):
@@ -45,25 +28,60 @@ class Image(Dataset):
         row = self.df.iloc[i]
         if row.h5path not in self.file_cache:
             self.file_cache[row.h5path] = h5py.File(row.h5path, "r")
-        f = self.file_cache[row.h5path]
-        img = f[row.id][()]
+        file = self.file_cache[row.h5path]
+        img = file[row.id][()]
         x = torch.as_tensor(img, dtype=torch.float32).unsqueeze(0)
-        x = transform_fn(x, self.size)
+        x = resize(self.cfg, x)
+        x = normalize(x)
         y = torch.tensor(row.bnpp_log, dtype=torch.float32)
+
         return x, y, row.id
 
-# --- Loader creation ---
+def get_df(cfg, csv_attr="train_csv"):
+    csv_path = getattr(cfg, csv_attr)
+    df = pd.read_csv(csv_path, usecols=["unique_key", "bnpp_value_log"])
+    df.columns = ["id", "bnpp_log"]
+    df = df.astype({"id": str, "bnpp_log": "float32"})
+
+    id_set = set(df["id"])
+    rows = []
+    for path in cfg.data_dir.glob("*.hdf5"):
+        try:
+            with h5py.File(path, "r") as file:
+                rows.extend(
+                    {"id": k, "h5path": str(path)}
+                    for k in file.keys()
+                    if k in id_set
+                )
+        except OSError as e:
+            print(f"failed read: {path} | error: {e}")
+
+    return df.merge(pd.DataFrame(rows), on="id", how="inner")
+
 def get_loaders(cfg):
-    full_df = get_labels(cfg.train_csv, cfg.data_dir)
-    test_df = get_labels(cfg.test_csv, cfg.data_dir)
-    train_df, val_df = train_test_split(full_df, test_size=cfg.val_frac, random_state=cfg.seed)
-
-    opts = dict(batch_size=cfg.batch_size, num_workers=cfg.num_workers, pin_memory=cfg.pin_memory)
+    full_df = get_df(cfg, "train_csv")
+    test_df = get_df(cfg, "test_csv")
+    train_df, val_df = train_test_split(
+        full_df,
+        test_size=cfg.val_frac,
+        random_state=cfg.seed
+    )
+    n_train, n_val, n_test = len(train_df), len(val_df), len(test_df)
+    n = n_train + n_val + n_test
+    print(
+        f"n: {n:,} | "
+        f"train: {n_train:,} ({n_train/n:.1%}) | "
+        f"val: {n_val:,} ({n_val/n:.1%}) | "
+        f"test: {n_test:,} ({n_test/n:.1%})"
+    )
+    opts = dict(
+        batch_size=cfg.batch_size,
+        num_workers=cfg.num_workers,
+        pin_memory=cfg.pin_memory
+    )
     loaders = {
-        "train": DataLoader(Image(train_df, cfg.size), shuffle=True, **opts),
-        "val":   DataLoader(Image(val_df, cfg.size),   shuffle=False, **opts),
-        "test":  DataLoader(Image(test_df, cfg.size),  shuffle=False, **opts),
+        "train": DataLoader(Image(cfg, train_df), shuffle=True,  **opts),
+        "val": DataLoader(Image(cfg, val_df), shuffle=False, **opts),
+        "test": DataLoader(Image(cfg, test_df), shuffle=False, **opts),
     }
-
-    print({k: len(v.dataset) for k, v in loaders.items()})
     return loaders["train"], loaders["val"], loaders["test"]

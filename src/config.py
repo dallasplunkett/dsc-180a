@@ -4,18 +4,18 @@ from pathlib import Path
 @dataclass
 class Config:
     # Project
-    project: str = "cnn"
+    project: str = "all_data_locally"
     seed: int | None = None
 
-    # Data paths
-    data_dir: Path = Path("data")               # for *.hdf5 loading to work
-    train_csv: Path = Path("data/train.csv")    # for training labels
-    test_csv: Path = Path("data/test.csv")      # for testing labels
+    # Data Paths
+    data_dir: Path = Path.home() / "Downloads" / "data"
+    train_csv: Path = data_dir / "train.csv"
+    test_csv: Path = data_dir / "test.csv"
 
-    # Model + training
+    # Model & Training
     size: int = 1024
     val_frac: float = 0.30
-    batch_size: int = 16
+    batch_size: int = 4
     epochs: int = 30
     lr: float = 1e-5
     weight_decay: float = 1e-5
