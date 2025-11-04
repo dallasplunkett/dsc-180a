@@ -1,45 +1,84 @@
-### Usage
+### How to Update Images
 
-__Step 1:__ Clone the repo and cd into it.
+__Step 0:__ Make your code changes
 
-```bash
-git clone https://github.com/dallasplunkett/dsc-180a.git && cd dsc-180a
-```
+Edit your source files locally, commit if needed, and ensure your project builds cleanly.
 
-__Step 2:__ Inside `config.py` update the `data_dir` to reflect where the *.hdf5 files are contained. Then update the `train_csv` and `test_csv` to specify the csv's specific paths. Below is where we have placed the directories and files along with their names.
-
-```
-dsc-180a/
-    ...
-    main.py
-    data/
-        train.csv
-        test.csv
-        images_1.hdf5
-        images_2.hdf5
-        ...
-    src/
-        config.py
-        data.py
-        ...
-```
-
-__Step 3:__ Build the container.
+__Step 1:__ Build the updated image
 
 ```bash
-docker build -t bnpp-trainer .
+docker buildx build --platform linux/amd64 -t <dockerhub_username>/<image_name>:latest .
 ```
 
-__Step 4:__ Run the container.
+Example
 
 ```bash
-docker run -it --rm \
-  --cpus=8 \
-  --memory=8g \
-  --shm-size=8g \
-  -v "$(pwd)/data:/app/data:ro" \
-  -v "$(pwd)/wandb:/app/wandb" \
-  bnpp-trainer
+docker buildx build --platform linux/amd64 -t dallasplunkett/train:latest .
 ```
 
-__Step 5:__ Follow the logs.
+__Step 2:__ Push the image to DockerHub
+
+```bash
+docker push <dockerhub_username>/<image_name>:<tag>
+```
+
+- Make sure your image is public so DSMLP can pull it without authentication.
+
+### How to Use the Image
+
+__Step 3:__ SSH into the DSMLP jumpbox
+
+```bash
+ssh <ucsd_username>@dsmlp-login.ucsd.edu
+# or
+ssh <ucsd_username>@128.54.65.160
+```
+
+- VPN may be required when off-campus
+
+__Step 4:__ Launch the container
+
+Use the `launch.sh` script to start your container with the desired resources.
+
+```bash
+launch.sh \
+    -W DSC180A_FA25_A00 -G b1100018875 \
+    -i <dockerhub_username>/<image_name>:<tag> \
+    -c 4 -m 16 -g 1 -v 1080ti \
+    -P Always \
+    -T -s
+```
+
+Example
+
+```bash
+launch.sh \
+    -W DSC180A_FA25_A00 -G b1100018875 \
+    -i dallasplunkett/train:latest \
+    -c 4 -m 16 -g 1 -v 1080ti \
+    -P Always \
+    -T -s
+```
+
+> __Flag Reference:__\
+> `-W` course workspace\
+> `-G` your team/group ID\
+> `-i` Docker image (on Docker Hub)\
+> `-c` CPU cores\
+> `-m` memory (GB)\
+> `-g` GPUs requested\
+> `-v` specific GPU type (e.g. 1080ti, 2080ti, V100)\
+> `-P Always` always pull the latest image version\
+> `-T` disable Jupyter Hub\
+> `-s` start in shell mode
+
+__Step 5:__ Run the training
+
+Once inside the container, run:
+
+```bash
+cd /workspace
+python main.py
+```
+
+__Step 6:__ Follow the logs
