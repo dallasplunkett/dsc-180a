@@ -15,14 +15,14 @@ class Config:
 
     # Model & Training
     size: int = 256
-    batch_size: int = 4
+    batch_size: int = 16
     epochs: int = 5
     lr: float = 1e-5
     weight_decay: float = 1e-5
 
     # System
-    num_workers: int = 0
-    pin_memory: bool = False
+    num_workers: int = 4
+    pin_memory: bool = True
 
     # Checkpoints
     best_path: Path = Path("checkpoints/best_model.pth")
