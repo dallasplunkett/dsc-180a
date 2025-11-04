@@ -4,19 +4,19 @@ from pathlib import Path
 @dataclass
 class Config:
     # Project
-    project: str = "all_data_locally"
+    project: str = "remote"
     seed: int | None = None
 
     # Data Paths
-    data_dir: Path = Path.home() / "Downloads" / "data"
-    train_csv: Path = data_dir / "train.csv"
-    test_csv: Path = data_dir / "test.csv"
+    data_dir: Path = Path.home() / "teams" / "b1"
+    train_csv: Path = data_dir / "BNPP_DT_train_with_ages.csv"
+    val_csv: Path   = data_dir / "BNPP_DT_val_with_ages.csv"
+    test_csv: Path  = data_dir / "BNPP_DT_test_with_ages.csv"
 
     # Model & Training
-    size: int = 1024
-    val_frac: float = 0.30
+    size: int = 256
     batch_size: int = 4
-    epochs: int = 30
+    epochs: int = 5
     lr: float = 1e-5
     weight_decay: float = 1e-5
 

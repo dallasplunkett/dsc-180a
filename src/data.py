@@ -59,13 +59,10 @@ def get_df(cfg, csv_attr="train_csv"):
     return df.merge(pd.DataFrame(rows), on="id", how="inner")
 
 def get_loaders(cfg):
-    full_df = get_df(cfg, "train_csv")
-    test_df = get_df(cfg, "test_csv")
-    train_df, val_df = train_test_split(
-        full_df,
-        test_size=cfg.val_frac,
-        random_state=cfg.seed
-    )
+    train_df = get_df(cfg, "train_csv")
+    val_df   = get_df(cfg, "val_csv")
+    test_df  = get_df(cfg, "test_csv")
+
     n_train, n_val, n_test = len(train_df), len(val_df), len(test_df)
     n = n_train + n_val + n_test
     print(
@@ -74,14 +71,18 @@ def get_loaders(cfg):
         f"val: {n_val:,} ({n_val/n:.1%}) | "
         f"test: {n_test:,} ({n_test/n:.1%})"
     )
+
     opts = dict(
         batch_size=cfg.batch_size,
         num_workers=cfg.num_workers,
         pin_memory=cfg.pin_memory
     )
+
     loaders = {
         "train": DataLoader(Image(cfg, train_df), shuffle=True,  **opts),
-        "val": DataLoader(Image(cfg, val_df), shuffle=False, **opts),
-        "test": DataLoader(Image(cfg, test_df), shuffle=False, **opts),
+        "val":   DataLoader(Image(cfg, val_df),   shuffle=False, **opts),
+        "test":  DataLoader(Image(cfg, test_df),  shuffle=False, **opts),
     }
+
     return loaders["train"], loaders["val"], loaders["test"]
+

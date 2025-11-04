@@ -1,24 +1,23 @@
-# --- base image ---
-FROM python:3.11-slim-bullseye
+FROM pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime
 
-# --- system setup ---
-WORKDIR /app
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /workspace
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libhdf5-dev && \
+    apt-get install -y --no-install-recommends libhdf5-dev ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# --- copy and install dependencies ---
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
-    --extra-index-url https://download.pytorch.org/whl/cpu
 
-# --- copy code ---
-COPY main.py .
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
 
-# --- default mount path for data ---
-VOLUME ["/app/data"]
+COPY . /workspace
 
-# --- entry ---
-CMD ["python", "main.py"]
+RUN mkdir -p /workspace/checkpoints && chmod -R 777 /workspace/checkpoints
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/workspace
+
+CMD ["/bin/bash"]
