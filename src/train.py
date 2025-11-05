@@ -14,11 +14,6 @@ class Trainer:
         self.optimizer = optimizer
         self.best_val_loss = float("inf")
 
-        wandb.init(project=project)
-        wandb.define_metric("epoch")
-        wandb.define_metric("loss/*", step_metric="epoch")
-        wandb.define_metric("pearson_r/*", step_metric="epoch")
-
     def _run(self, loader, train: bool, desc: str):
         self.model.train() if train else self.model.eval()
         total_loss, n = 0.0, 0

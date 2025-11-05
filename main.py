@@ -2,7 +2,7 @@ import warnings, time
 warnings.filterwarnings("ignore")
 
 from src.config import Config, TestConfig
-from src.utils import set_seed, get_device, log_config, log_data_summary
+from src.utils import set_seed, get_device
 from src.data import get_loaders
 from src.model import make_model
 from src.train import Trainer
@@ -16,11 +16,14 @@ if __name__ == "__main__":
     cfg = TestConfig()
     cfg.seed = set_seed(cfg.seed)
     device = get_device()
-    log_config(cfg, device)
+    wandb.init(
+        project=cfg.project,
+        config=vars(cfg),
+        name=f"{cfg.project}_{cfg.seed}"
+    )
 
     # --- Data ---
     train_loader, val_loader, test_loader = get_loaders(cfg)
-    log_data_summary(train_loader, val_loader, test_loader)
 
     # --- Model ---
     model = make_model().to(device)
