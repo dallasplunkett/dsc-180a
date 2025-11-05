@@ -1,20 +1,24 @@
-# Enviroment
+# Git
+.git
+.gitignore
+
+# Environment
 .env
 .env.*
 
 # macOS
 .DS_Store
 
-# Python Cache
+# Python cache & bytecode
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*.pyd
 
-# Weights and Biases
+# Model weights and checkpoints
 *.pt
 *.pth
+checkpoints/
 
-# Data and Logs
+# Data and experiment logs
 data/
 wandb/
-checkpoints/

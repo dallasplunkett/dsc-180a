@@ -1,84 +1,66 @@
-### How to Update Images
+## Usage
 
-__Step 0:__ Make your code changes
+#### Step 0: Make any updates to your code.
 
-Edit your source files locally, commit if needed, and ensure your project builds cleanly.
-
-__Step 1:__ Build the updated image
+#### Step 1: Build the Docker image for the target platform and tag it.
 
 ```bash
-docker buildx build --platform linux/amd64 -t <dockerhub_username>/<image_name>:latest .
+docker buildx build --platform [TARGET_OS]/[TARGET_CPU] -t [DOCKER_USERNAME]/[IMAGE]:[TAG] [CONTEXT_PATH]
 ```
 
-Example
+Example,
 
 ```bash
 docker buildx build --platform linux/amd64 -t dallasplunkett/train:latest .
 ```
 
-__Step 2:__ Push the image to DockerHub
+#### Step 2: Push the image to Docker Hub (must be public for DSMLP).
 
 ```bash
-docker push <dockerhub_username>/<image_name>:<tag>
+docker push [DOCKER_USERNAME]/[IMAGE]:[TAG]
 ```
 
-- Make sure your image is public so DSMLP can pull it without authentication.
-
-### How to Use the Image
-
-__Step 3:__ SSH into the DSMLP jumpbox
+Example,
 
 ```bash
-ssh <ucsd_username>@dsmlp-login.ucsd.edu
+docker push dallasplunkett/train:latest
+```
+
+#### Step 3: SSH into the DSMLP jumpbox (VPN may be required if off campus).
+
+```bash
+ssh [UCSD_USERNAME]@dsmlp-login.ucsd.edu
 # or
-ssh <ucsd_username>@128.54.65.160
+ssh [UCSD_USERNAME]@128.54.65.160
 ```
 
-- VPN may be required when off-campus
-
-__Step 4:__ Launch the container
-
-Use the `launch.sh` script to start your container with the desired resources.
+#### Step 4: Launch your container with the desired resources.
 
 ```bash
 launch.sh \
-    -W DSC180A_FA25_A00 -G b1100018875 \
-    -i <dockerhub_username>/<image_name>:<tag> \
-    -c 4 -m 16 -g 1 -v 1080ti \
-    -P Always \
-    -T -s
+    -W [COURSE_WORKSPACE] -G [GROUP_ID] \
+    -i [DOCKER_USERNAME]/[IMAGE]:[TAG] \
+    -c [NUMBER_OF_CPUs] -m [SIZE_OF_RAM] -g [NUMBER_OF_GPUs] -v [GPU_VARIANT] \
+    -P Always -T -s
 ```
 
-Example
+Example,
 
 ```bash
 launch.sh \
     -W DSC180A_FA25_A00 -G b1100018875 \
     -i dallasplunkett/train:latest \
-    -c 4 -m 16 -g 1 -v 1080ti \
-    -P Always \
-    -T -s
+    -c 2 -m 16 -g 1 -v 1080ti \
+    -P Always -T -s
 ```
 
-> __Flag Reference:__\
-> `-W` course workspace\
-> `-G` your team/group ID\
-> `-i` Docker image (on Docker Hub)\
-> `-c` CPU cores\
-> `-m` memory (GB)\
-> `-g` GPUs requested\
-> `-v` specific GPU type (e.g. 1080ti, 2080ti, V100)\
-> `-P Always` always pull the latest image version\
-> `-T` disable Jupyter Hub\
-> `-s` start in shell mode
+[Reference for DSMLP Launch Flags](https://support.ucsd.edu/services?id=kb_article_view&sysparm_article=KB0032273)
 
-__Step 5:__ Run the training
-
-Once inside the container, run:
+#### Step 5: Inside the container, start training.
 
 ```bash
 cd /workspace
 python main.py
 ```
 
-__Step 6:__ Follow the logs
+#### Step 6: Watch logs, you will need to authenticate with Weights & Biases on first run.
