@@ -4,7 +4,7 @@ from pathlib import Path
 @dataclass
 class Config:
     # Project
-    project: str = "remote"
+    project: str = "remote-full"
     seed: int | None = None
 
     # Data Paths
@@ -14,9 +14,9 @@ class Config:
     test_csv: Path  = data_dir / "BNPP_DT_test_with_ages.csv"
 
     # Model & Training
-    size: int = 256
+    size: int = 1024
     batch_size: int = 16
-    epochs: int = 5
+    epochs: int = 20
     lr: float = 1e-5
     weight_decay: float = 1e-5
 
