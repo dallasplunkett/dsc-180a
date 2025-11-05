@@ -13,7 +13,6 @@ def scatter(y_log_true, y_log_pred):
     r, _ = pearsonr(lx, ly) if len(lx) > 1 else (np.nan, None)
     slope, itc = np.polyfit(lx, ly, 1)
 
-    # for visualization, convert to BNPP scale for plotting
     y = np.clip(np.power(10.0, y_log_true) - 1.0, 1e-6, None)
     p = np.clip(np.power(10.0, y_log_pred) - 1.0, 1e-6, None)
     lo, hi = 1.0, 100_000.0

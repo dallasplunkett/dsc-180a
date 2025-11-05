@@ -3,10 +3,6 @@ from scipy.stats import pearsonr
 import wandb
 from tqdm import tqdm
 
-# def pearson_r(y_log, p_log):
-#     y, p = np.power(10.0, y_log) - 1, np.power(10.0, p_log) - 1
-#     return pearsonr(y, p)[0] if len(y) > 1 else np.nan
-
 def pearson_r(y_log, p_log):
     return pearsonr(y_log, p_log)[0] if len(y_log) > 1 else np.nan
 
