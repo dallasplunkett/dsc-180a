@@ -41,7 +41,6 @@ class Trainer:
             va = self._run(val_loader,   train=False, desc="validation")
 
             wandb.log({
-                "epoch": epoch,
                 "loss/train": tr["loss"],
                 "pearson_r/train": tr["pearson_r"],
                 "loss/validation": va["loss"],
