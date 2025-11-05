@@ -63,15 +63,6 @@ def get_loaders(cfg):
     val_df   = get_df(cfg, "val_csv")
     test_df  = get_df(cfg, "test_csv")
 
-    n_train, n_val, n_test = len(train_df), len(val_df), len(test_df)
-    n = n_train + n_val + n_test
-    print(
-        f"n: {n:,} | "
-        f"train: {n_train:,} ({n_train/n:.1%}) | "
-        f"val: {n_val:,} ({n_val/n:.1%}) | "
-        f"test: {n_test:,} ({n_test/n:.1%})"
-    )
-
     opts = dict(
         batch_size=cfg.batch_size,
         num_workers=cfg.num_workers,

@@ -2,7 +2,7 @@ import warnings, time
 warnings.filterwarnings("ignore")
 
 from src.config import Config, TestConfig
-from src.utils import set_seed, get_device, log_config
+from src.utils import set_seed, get_device, log_config, log_data_summary
 from src.data import get_loaders
 from src.model import make_model
 from src.train import Trainer
@@ -13,13 +13,14 @@ from src.plots import scatter, select_examples, plot_examples_from_df
 
 if __name__ == "__main__":
     # --- Setup --- 
-    cfg = Config()
-    set_seed(cfg.seed)
+    cfg = TestConfig()
+    cfg.seed = set_seed(cfg.seed)
     device = get_device()
     log_config(cfg, device)
 
     # --- Data ---
     train_loader, val_loader, test_loader = get_loaders(cfg)
+    log_data_summary(train_loader, val_loader, test_loader)
 
     # --- Model ---
     model = make_model().to(device)

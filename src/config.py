@@ -3,8 +3,8 @@ from pathlib import Path
 
 @dataclass
 class Config:
-    # --- Project --- 
-    project: str     = "remote-full"
+    # --- Project ---
+    project: str     = "remote"
     seed: int | None = None
 
     # --- Data Paths ---
@@ -20,27 +20,27 @@ class Config:
     lr: float           = 1e-5
     weight_decay: float = 1e-5
 
-    # --- System --- 
+    # --- System ---
     num_workers: int = 4
     pin_memory: bool = True
 
-    # --- Checkpoints --- 
+    # --- Checkpoints ---
     best_path: Path = Path("checkpoints/best_model.pth")
     last_path: Path = Path("checkpoints/last_model.pth")
 
 @dataclass
 class TestConfig:
-    # --- Project --- 
-    project: str     = "test"
+    # --- Project ---
+    project: str     = "local"
     seed: int | None = None
 
-    # --- Data Paths --- 
-    data_dir: Path  = Path.home() / "data"
+    # --- Data Paths ---
+    data_dir: Path  = Path("data")
     train_csv: Path = data_dir / "BNPP_DT_train_with_ages.csv"
     val_csv: Path   = data_dir / "BNPP_DT_val_with_ages.csv"
     test_csv: Path  = data_dir / "BNPP_DT_test_with_ages.csv"
 
-    # --- Model & Training --- 
+    # --- Model & Training ---
     size: int          = 256
     batch_size: int    = 32
     epochs: int        = 5
