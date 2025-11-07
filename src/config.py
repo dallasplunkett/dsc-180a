@@ -41,9 +41,9 @@ class TestConfig:
     test_csv: Path  = data_dir / "BNPP_DT_test_with_ages.csv"
 
     # --- Model & Training ---
-    size: int          = 64
-    batch_size: int    = 64
-    epochs: int        = 3
+    size: int          = 256
+    batch_size: int    = 32
+    epochs: int        = 8
     lr: float           = 1e-5
     weight_decay: float = 1e-5
 
