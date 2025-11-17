@@ -1,69 +1,67 @@
-import warnings, time
-warnings.filterwarnings("ignore")
+import time
 
-from src.config import Config, TestConfig
-from src.utils import set_seed, get_device, get_pred_df, scatter, examples
+import matplotlib.pyplot as plt
+import torch
+
+import wandb
+from src.config import remote_cfg, test_cfg
 from src.data import get_loaders
 from src.model import make_model
 from src.train import Trainer
-import torch, wandb
-import matplotlib.pyplot as plt
+from src.utils import examples, get_device, get_pred_df, parse_config, scatter
 
 if __name__ == "__main__":
-    # --- Setup --- 
-    cfg = TestConfig()
-    cfg.seed = set_seed(cfg.seed)
-    device = get_device()
-    wandb.init(
-        project=cfg.project,
-        config=vars(cfg),
-        name=f"{cfg.project}_{cfg.seed}"
+    # --- Setup ---
+    cfg, project = parse_config(default_preset="remote")
+    run = wandb.init(
+        project=project,
+        config=cfg,
+        config_exclude_keys=["image_dir", "train_csv", "val_csv", "test_csv"],
     )
+    device = get_device()
 
     # --- Data ---
     train_loader, val_loader, test_loader = get_loaders(cfg)
 
     # --- Model ---
-    model = make_model().to(device)
+    model = make_model(name=cfg["model"]).to(device)
+
     loss_fn = torch.nn.L1Loss()
     optimizer = torch.optim.AdamW(
-        model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay
+        model.parameters(),
+        lr=cfg["learning_rate"],
+        weight_decay=cfg["weight_decay"],
     )
-    trainer = Trainer(model, device, loss_fn, optimizer, project=cfg.project)
+    trainer = Trainer(model, device, loss_fn, optimizer)
 
-    # --- Fit & Eval ---
+    # --- Train ---
     t0 = time.time()
-    trainer.train(
-        train_loader, val_loader,
-        epochs=cfg.epochs,
-        best_path=cfg.best_path, last_path=cfg.last_path
-    )
-    model.load_state_dict(torch.load(cfg.best_path))
-    test_metrics = trainer.test(test_loader)
-    runtime = time.time() - t0
-    wandb.log({
-        "loss/test": test_metrics["loss"],
-        "pearson_r/test": test_metrics["pearson_r"],
-        "runtime/minutes": runtime / 60,
-    })
-    
-    # --- Predict ---
-    ids, y_true_log, y_pred_log = trainer.predict(test_loader)
-    pred_df = get_pred_df(ids, y_true_log, y_pred_log)
-    wandb.log({
-        "predictions": wandb.Table(dataframe=pred_df)
-    })
-    chart = scatter(y_true_log, y_pred_log)
-    wandb.log({
-        "scatter": wandb.Html(chart.to_html())
-    })
-    good_example, bad_example = examples(pred_df, test_loader.dataset.df)
-    wandb.log({
-        "examples/best": wandb.Image(good_example),
-        "examples/worst": wandb.Image(bad_example),
-    })
+    trainer.train(train_loader, val_loader, epochs=cfg["epochs"])
 
-    # --- Cleanup ---
-    plt.close(good_example)
-    plt.close(bad_example)
+    # --- Test ---
+    model.load_state_dict(torch.load("checkpoints/best_model.pth"))
+    test_metrics = trainer.test(test_loader)
+    wandb.log(
+        {
+            "loss/test": test_metrics["loss"],
+            "pearson_r/test": test_metrics["pearson_r"],
+            "runtime/minutes": (time.time() - t0) / 60,
+        }
+    )
+
+    # --- Prediction Table ---
+    ids, yt, yp = trainer.predict(test_loader)
+    pred_df = get_pred_df(ids, yt, yp)
+    wandb.log({"predictions": wandb.Table(dataframe=pred_df)})
+
+    # --- Predicted BNPP vs Actual BNPP, Pearson r ---
+    scatter_plt = scatter(pred_df["y_true_log"].values, pred_df["y_pred_log"].values)
+    wandb.log({"scatter": wandb.Html(scatter_plt.to_html())})
+
+    # --- Best and Worst Predictions ---
+    good, bad = examples(pred_df, test_loader.dataset.df)
+    wandb.log({"examples/best": wandb.Image(good), "examples/worst": wandb.Image(bad)})
+
+    plt.close(good)
+    plt.close(bad)
     wandb.finish()

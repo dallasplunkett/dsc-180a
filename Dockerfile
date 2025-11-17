@@ -13,6 +13,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY . .
-RUN mkdir -p checkpoints && chmod -R 777 checkpoints
+RUN mkdir -p checkpoints wandb && chmod -R a+rwX /workspace
 
 CMD ["python", "main.py"]

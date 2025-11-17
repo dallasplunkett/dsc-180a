@@ -1,17 +1,24 @@
-import h5py, torch, pandas as pd
-from torch.utils.data import Dataset, DataLoader
+from pathlib import Path
+
+import h5py
+import pandas as pd
+import torch
 import torch.nn.functional as F
+from torch.utils.data import DataLoader, Dataset
+
 
 def resize(cfg, x):
     return F.interpolate(
         x.unsqueeze(0),
-        size=(cfg.size, cfg.size),
+        size=(cfg["size"], cfg["size"]),
         mode="bilinear",
-        align_corners=False
+        align_corners=False,
     ).squeeze(0)
+
 
 def normalize(x):
     return (x - x.min()) / torch.clamp(x.max() - x.min(), min=1e-6)
+
 
 class Image(Dataset):
     def __init__(self, cfg, df):
@@ -35,43 +42,43 @@ class Image(Dataset):
 
         return x, y, row.id
 
+
 def get_df(cfg, csv_attr="train_csv"):
-    csv_path = getattr(cfg, csv_attr)
+    csv_path = Path(cfg[csv_attr])
     df = pd.read_csv(csv_path, usecols=["unique_key", "bnpp_value_log"])
     df.columns = ["id", "bnpp_log"]
     df = df.astype({"id": str, "bnpp_log": "float32"})
 
     id_set = set(df["id"])
     rows = []
-    for path in cfg.data_dir.glob("*.hdf5"):
+    image_dir = Path(cfg["image_dir"])
+    for path in image_dir.glob("*.hdf5"):
         try:
             with h5py.File(path, "r") as file:
                 rows.extend(
-                    {"id": k, "h5path": str(path)}
-                    for k in file.keys()
-                    if k in id_set
+                    {"id": k, "h5path": str(path)} for k in file.keys() if k in id_set
                 )
         except OSError as e:
             print(f"failed read: {path} | error: {e}")
 
     return df.merge(pd.DataFrame(rows), on="id", how="inner")
 
+
 def get_loaders(cfg):
     train_df = get_df(cfg, "train_csv")
-    val_df   = get_df(cfg, "val_csv")
-    test_df  = get_df(cfg, "test_csv")
+    val_df = get_df(cfg, "val_csv")
+    test_df = get_df(cfg, "test_csv")
 
     opts = dict(
-        batch_size=cfg.batch_size,
-        num_workers=cfg.num_workers,
-        pin_memory=cfg.pin_memory
+        batch_size=cfg["batch_size"],
+        num_workers=cfg["num_workers"],
+        pin_memory=cfg["pin_memory"],
     )
 
     loaders = {
-        "train": DataLoader(Image(cfg, train_df), shuffle=True,  **opts),
-        "val":   DataLoader(Image(cfg, val_df),   shuffle=False, **opts),
-        "test":  DataLoader(Image(cfg, test_df),  shuffle=False, **opts),
+        "train": DataLoader(Image(cfg, train_df), shuffle=True, **opts),
+        "val": DataLoader(Image(cfg, val_df), shuffle=False, **opts),
+        "test": DataLoader(Image(cfg, test_df), shuffle=False, **opts),
     }
 
     return loaders["train"], loaders["val"], loaders["test"]
-

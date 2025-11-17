@@ -95,30 +95,29 @@ ssh [UCSD_USERNAME]@128.54.65.160
 #### Step 4. Launch the Container
 
 ```bash
+WANDB_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxx \
 launch.sh \
     -W [COURSE_WORKSPACE] -G [GROUP_ID] \
     -i [DOCKER_USERNAME]/[IMAGE]:[TAG] \
     -c [NUMBER_OF_CPUs] -m [SIZE_OF_RAM] -g [NUMBER_OF_GPUs] -v [GPU_VARIANT] \
-    -P Always -T -s
+    -P Always -B -- \
+    python /workspace/main.py 
 ```
 
 Example,
 
 ```bash
+# Replace with your W&B key
+WANDB_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxx \
+# Run with the desired flags
 launch.sh \
-    -W DSC180A_FA25_A00 -G b1100018875 \
-    -i dallasplunkett/train:latest \
-    -c 2 -m 16 -g 1 -v 1080ti \
-    -P Always -T -s
+  -W DSC180A_FA25_A00 -G b1100018875 \
+  -i dallasplunkett/train:latest \
+  -c 2 -m 16 -g 1 -v 1080ti \
+  -P Always -B -- \
+  bash -lc 'cd /workspace && python main.py --project compare --model resnet50 --size 256'
 ```
 
 [Reference for DSMLP Launch Flags](https://support.ucsd.edu/services?id=kb_article_view&sysparm_article=KB0032273)
 
-#### Step 5. Run the Program
-
-```bash
-cd /workspace
-python main.py
-```
-
-#### Step 6. Follow the Logs
+#### Step 5. Follow the Logs
