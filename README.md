@@ -133,7 +133,7 @@ launch.sh \
 
 | Flag                | Type       | Description                                                                                                 |
 | ------------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
-| `--preset`, `--cfg` | enum       | Selects a base configuration preset (default = `remote`) — supported values: `remote`, `local`, `test`      |
+| `--preset`, `--cfg` | string       | Selects a base configuration preset (default = `remote`) — supported values: `remote`, `local`, `test`      |
 | `--project`         | string     | Sets the Weights & Biases project name                                                                      |
 | `--model`           | string     | CNN backbone architecture — supported values: `resnet18`, `resnet34`, `resnet50`, `resnet101`, `resnet152`  |
 | `--size`            | integer    | Input image resolution (square) — ranges: 0 to 1024                                                         |
