@@ -53,7 +53,7 @@ python3 main.py --preset local
 
 You will be prompted to select which mode you want to run W&B in. *Enter option 2*. You will then be prompted to enter your API Key. From there the program should run and you will see a link to the W&B project. Click the link next to the rocket 🚀 emoji and watch the CNN train! Once the final epoch completes, predictions, examples, and more plots will be created within the W&B dashboard.
 
-> **NOTE:** This these steps uses a very small subset of the data and a lower quality configuration in the hopes to allow a grader to see in part, what we have done. So the performance and results are not what will be seen in the report — those took beefy GPUs and days to run on the DSMLP platform.
+> **NOTE:** These steps uses a very small subset of the data and a lower quality configuration in the hopes to allow a grader to see in part, what we have done. So the performance and results are not what will be seen in the report — those took beefy GPUs and days to run on the DSMLP platform.
 
 ### Step 7. (Optional) Play with the Config!
 
