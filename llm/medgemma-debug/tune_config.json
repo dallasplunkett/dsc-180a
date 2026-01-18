@@ -1,0 +1,17 @@
+{
+  "in": "../data/reports/clean_reports.csv",
+  "prompt": "../data/reports/prompt.txt",
+  "base_model": "mlx-community/medgemma-4b-it-4bit",
+  "out_dir": "medgemma-debug",
+  "iters": 5,
+  "lr": 0.0001,
+  "batch_size": 1,
+  "seed": 0,
+  "grad_checkpoint": false,
+  "counts": {
+    "train": 10,
+    "valid": 5,
+    "test": 2888
+  },
+  "mlx_extra": []
+}
