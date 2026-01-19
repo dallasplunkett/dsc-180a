@@ -51,7 +51,7 @@ if __name__ == "__main__":
         "-o", "--output",
         dest="out_path",
         required=True,
-        help="Input CSV file path"
+        help="Output CSV file path"
     )
     parser.add_argument(
         "-p", "--prompt",
@@ -60,8 +60,8 @@ if __name__ == "__main__":
         help="Input TXT file path"
     )
     parser.add_argument(
-        "-b", "--base-model",
-        dest="base_model_id",
+        "-m", "--model",
+        dest="model_id",
         required=True,
         help="HuggingFace model ID (see https://huggingface.co/models?library=mlx for options)"
     )
@@ -95,8 +95,8 @@ if __name__ == "__main__":
         df = df.head(args.limit).copy()
         logging.info(f"Input limited to first {args.limit} rows")
 
-    model, tokenizer = load(args.base_model_id, adapter_path=adapters_path)
-    logging.info(f"Loading model {args.base_model_id} with adapters from {adapters_path}")
+    model, tokenizer = load(args.model_id, adapter_path=adapters_path)
+    logging.info(f"Loading model {args.model_id} with adapters from {adapters_path}")
 
     predicted_presence = []
     predicted_severity = []
