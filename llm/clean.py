@@ -2,14 +2,12 @@ import sys, logging, argparse
 from pathlib import Path
 import pandas as pd
 
-
 REQUIRED_COLUMNS = [
     "Train/Test/Val",
     "Edema",
     "Radiologist_Report",
 ]
 
-# Set up logging to stderr
 logging.basicConfig(
     level=logging.INFO,
     stream=sys.stderr,
@@ -20,59 +18,31 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Clean and Process CSV data"
     )
-
     parser.add_argument(
         "-i", "--input",
         dest="input_path",
-        required=False,
-        help="Input CSV file path (if omitted, read from stdin)"
+        required=True,
+        help="Input CSV file path"
     )
     parser.add_argument(
         "-o", "--output",
         dest="output_path",
-        required=False,
-        help="Output CSV file path (if omitted, write to stdout)"
+        required=True,
+        help="Output CSV file path"
     )
-
-    # Parse Arguments
     args = parser.parse_args()
 
-    # Determine input source
-    if args.input_path:
-        input_path = Path(args.input_path)
-        logging.info(f"Reading from {input_path}")
-        df = pd.read_csv(input_path)
-    else:
-        logging.info("Reading from stdin")
-        df = pd.read_csv(sys.stdin)
+    input_path = Path(args.input_path)
+    logging.info(f"Reading from {input_path}")
 
-    # Determine output destination
-    if args.output_path:
-        output_path = Path(args.output_path)
-        # Ensure Output Directory Exists
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_func = lambda df: df.to_csv(output_path, index=False)
-        logging.info(f"Writing to {output_path}")
-    else:
-        output_func = lambda df: df.to_csv(sys.stdout, index=False)
-        logging.info("Writing to stdout")
+    output_path = Path(args.output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    logging.info(f"Writing to {output_path}")
 
-    # Validate Expected Columns
-    missing = set(REQUIRED_COLUMNS) - set(df.columns)
-    if missing:
-        logging.error(f"Missing required columns {missing}")
-        sys.exit(1)
-
-    # Subset Data
+    df = pd.read_csv(input_path)
     df = df[REQUIRED_COLUMNS].copy()
 
-    # Process Edema Column
     parts = df["Edema"].str.split(r"\s*\n\s*", expand=True)
-    if parts.shape[1] < 3:
-        logging.error(
-            f"Failed to parse 'Edema' column: expected 3 parts, got {parts.shape[1]}"
-        )
-        sys.exit(1)
     df["presence"] = (
         parts[0]
         .str.replace("Presence:", "", regex=False)
@@ -90,13 +60,11 @@ if __name__ == "__main__":
     )
     df = df.drop(columns=["Edema"])
 
-    # Rename Columns
     df = df.rename(columns={
         "Train/Test/Val": "split",
         "Radiologist_Report": "report",
     })
 
-    # Normalize
     for col in ["presence", "severity", "change"]:
         df[col] = (
             df[col]
@@ -105,9 +73,7 @@ if __name__ == "__main__":
             .replace(["na", ""], pd.NA)
         )
 
-    # Drop Specific Invalid Rows
     df = df[df["presence"] != "none"].copy()
 
-    # Export Cleaned Data
-    output_func(df)
+    df.to_csv(output_path, index=False)
     logging.info("Data cleaning and processing completed successfully")
