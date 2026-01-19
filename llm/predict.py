@@ -95,7 +95,6 @@ if __name__ == "__main__":
         df = df.head(args.limit).copy()
         logging.info(f"Input limited to first {args.limit} rows")
 
-    # Load model + adapters
     model, tokenizer = load(args.base_model_id, adapter_path=adapters_path)
     logging.info(f"Loading model {args.base_model_id} with adapters from {adapters_path}")
 
