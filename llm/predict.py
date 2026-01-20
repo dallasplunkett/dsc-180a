@@ -11,11 +11,6 @@ logging.basicConfig(
     format='[%(levelname)s] %(message)s'
 )
 
-MAX_TOKENS = 128
-TOP_P = 0.95
-TOP_K = 64
-TEMP = 0.0
-
 def extract_json(text):
     if text is None:
         return None
@@ -49,7 +44,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-o", "--output",
-        dest="out_path",
+        dest="output_path",
         required=True,
         help="Output CSV file path"
     )
@@ -72,7 +67,7 @@ if __name__ == "__main__":
         help="Path to adapters directory"
     )
     parser.add_argument(
-        "l", "--limit",
+        "-l", "--limit",
         type=int,
         default=None
     )
@@ -81,8 +76,9 @@ if __name__ == "__main__":
     input_path = Path(args.input_path)
     logging.info(f"Reading input from {input_path}")
 
-    out_path = Path(args.out_path)
-    logging.info(f"Writing output to {out_path}")
+    output_path = Path(args.output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    logging.info(f"Writing output to {output_path}")
 
     prompt_path = Path(args.prompt_path)
     prompt_text = prompt_path.read_text(encoding="utf-8").strip()
@@ -119,10 +115,10 @@ if __name__ == "__main__":
             model,
             tokenizer,
             prompt=prompt,
-            max_tokens=MAX_TOKENS,
-            temp=TEMP,
-            top_p=TOP_P,
-            top_k=TOP_K,
+            max_tokens=128,
+            temp=0.0,
+            top_p=0.95,
+            top_k=64,
         )
 
         raws.append(out_text)
@@ -144,6 +140,5 @@ if __name__ == "__main__":
     out_df["predicted_change"] = predicted_change
     out_df["raw_model_output"] = raws
 
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_df.to_csv(out_path, index=False)
+    out_df.to_csv(output_path, index=False)
     logging.info(f"Prediction completed successfully")
