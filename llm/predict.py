@@ -93,7 +93,7 @@ if __name__ == "__main__":
         df = df.head(args.limit).copy()
         logging.info(f"Input limited to first {args.limit} rows")
 
-    model, tokenizer = load(args.model_id, adapter_path=adapter_path)
+    model, tokenizer = load(args.model_id, adapter_path=adapter_path) # type: ignore
     logging.info(f"Loading model {args.model_id} with adapters from {adapter_path}")
 
     predicted_presence = []
