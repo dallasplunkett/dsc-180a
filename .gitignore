@@ -20,3 +20,5 @@ checkpoints/
 # Data and experiment logs
 data/
 wandb/
+
+llm/_*

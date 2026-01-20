@@ -1,9 +1,10 @@
-import sys, logging, argparse, json
+import sys, logging, argparse, json, re
 from pathlib import Path
 import pandas as pd
 from tqdm import tqdm
 
 from mlx_lm import load, generate
+from mlx_lm.sample_utils import make_sampler
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,20 +15,16 @@ logging.basicConfig(
 def extract_json(text):
     if text is None:
         return None
+
     s = str(text).strip()
+    s = s.replace("<end_of_turn>", "").strip()
 
-    if "```" in s:
-        parts = [p.strip() for p in s.split("```") if p.strip()]
-        s = max(parts, key=len) if parts else s
+    m = re.search(r"```(?:json)?\s*(.*?)\s*```", s, flags=re.DOTALL | re.IGNORECASE)
+    if m:
+        s = m.group(1).strip()
 
-    start = s.find("{")
-    end = s.rfind("}")
-    if start == -1 or end == -1 or end <= start:
-        return None
-
-    candidate = s[start : end + 1]
     try:
-        return json.loads(candidate)
+        return json.loads(s)
     except Exception:
         return None
 
@@ -63,8 +60,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "-a", "--adapters",
         dest="adapters_path",
-        required=True,
-        help="Path to adapters directory"
+        default=None,
+        help="Path to adapters directory (optional). If omitted, runs base model."
     )
     parser.add_argument(
         "-l", "--limit",
@@ -84,61 +81,83 @@ if __name__ == "__main__":
     prompt_text = prompt_path.read_text(encoding="utf-8").strip()
     logging.info(f"Reading prompt from {prompt_path}")
 
-    adapters_path = str(Path(args.adapters_path))
+    adapter_path = None
+    if args.adapters_path:
+        adapter_path = str(Path(args.adapters_path))
+        logging.info(f"Loading model {args.model_id} with adapters from {adapter_path}")
+    else:
+        logging.info(f"Loading model {args.model_id}")
     
     df = pd.read_csv(input_path)
     if args.limit is not None:
         df = df.head(args.limit).copy()
         logging.info(f"Input limited to first {args.limit} rows")
 
-    model, tokenizer = load(args.model_id, adapter_path=adapters_path)
-    logging.info(f"Loading model {args.model_id} with adapters from {adapters_path}")
+    model, tokenizer = load(args.model_id, adapter_path=adapter_path)
+    logging.info(f"Loading model {args.model_id} with adapters from {adapter_path}")
 
     predicted_presence = []
     predicted_severity = []
     predicted_change = []
-    raws = []
+
+    raw_outputs = []
+
+    sampler = make_sampler(0.0)
 
     logging.info(f"Processing {len(df)} reports")
     for report in tqdm(df["report"].astype(str).tolist(), desc="Inferring"):
-        prompt = (
-            "<start_of_turn>system\n"
-            f"{prompt_text}\n"
-            "<end_of_turn>\n"
-            "<start_of_turn>user\n"
-            f"{report}\n"
-            "<end_of_turn>\n"
-            "<start_of_turn>model\n"
-        )
+        prompt = prompt_text.replace("{report_text}", report.strip())
+        if not prompt.endswith("\n"):
+            prompt += "\n"
 
         out_text = generate(
             model,
             tokenizer,
             prompt=prompt,
             max_tokens=128,
-            temp=0.0,
-            top_p=0.95,
-            top_k=64,
+            sampler=sampler,
         )
 
-        raws.append(out_text)
+        raw = str(out_text)
+        raw_outputs.append(raw)
 
-        obj = extract_json(out_text)
+        obj = extract_json(raw)
+
         if obj is None:
             predicted_presence.append("parse_error")
             predicted_severity.append("parse_error")
             predicted_change.append("parse_error")
             continue
 
-        predicted_presence.append(str(obj.get("presence", "missing")).strip().lower())
-        predicted_severity.append(str(obj.get("severity", "missing")).strip().lower())
-        predicted_change.append(str(obj.get("change", "missing")).strip().lower())
+        # Normalize keys
+        obj = {str(k).strip().lower(): v for k, v in obj.items()}
+
+        p = str(obj.get("presence", "missing")).strip().lower()
+        s = str(obj.get("severity", "missing")).strip().lower()
+        c = str(obj.get("change", "missing")).strip().lower()
+
+        # Enforce semantic dependency rule
+        if p != "present":
+            s = "na"
+            c = "na"
+
+        if p == "present":
+            if s == "na":
+                s = "unknown"
+            if c == "na":
+                c = "unknown"
+
+        predicted_presence.append(p)
+        predicted_severity.append(s)
+        predicted_change.append(c)
 
     out_df = df.copy()
+
     out_df["predicted_presence"] = predicted_presence
     out_df["predicted_severity"] = predicted_severity
     out_df["predicted_change"] = predicted_change
-    out_df["raw_model_output"] = raws
+
+    out_df["raw_model_output"] = raw_outputs
 
     out_df.to_csv(output_path, index=False)
-    logging.info(f"Prediction completed successfully")
+    logging.info("Prediction completed successfully")

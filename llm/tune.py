@@ -9,6 +9,14 @@ logging.basicConfig(
 )
 
 def write_jsonl(df, prompt_text, output_path):
+    """
+    Writes MLX-LM LoRA JSONL where each line is:
+      {"text": "<start_of_turn>user ... <start_of_turn>model {gold} <end_of_turn>"}
+
+    Assumes prompt_text contains:
+      - {report_text} placeholder
+      - ends with "<start_of_turn>model" line (no answer yet)
+    """
     output_path.parent.mkdir(parents=True, exist_ok=True)
     written = 0
 
@@ -20,17 +28,15 @@ def write_jsonl(df, prompt_text, output_path):
                 "change": row.change,
             }
 
-            text = (
-                "<start_of_turn>system\n"
-                f"{prompt_text}\n"
-                "<end_of_turn>\n"
-                "<start_of_turn>user\n"
-                f"{str(row.report)}\n"
-                "<end_of_turn>\n"
-                "<start_of_turn>model\n"
-                f"{json.dumps(labels, ensure_ascii=False)}\n"
-                "<end_of_turn>\n"
-            )
+            # Fill the prompt template
+            prompt = prompt_text.replace("{report_text}", str(row.report).strip())
+
+            # Ensure prompt ends with a newline after the model turn token
+            if not prompt.endswith("\n"):
+                prompt += "\n"
+
+            # Training text MUST include the gold answer and close the model turn
+            text = prompt + json.dumps(labels, ensure_ascii=False) + "<end_of_turn>"
 
             f.write(json.dumps({"text": text}, ensure_ascii=False) + "\n")
             written += 1
@@ -64,6 +70,24 @@ if __name__ == "__main__":
         dest="model_id",
         required=True,
         help="HuggingFace model ID (see https://huggingface.co/models?library=mlx for options)"
+    )
+    parser.add_argument(
+        "--iters",
+        type=int,
+        default=200,
+        help="Number of training iterations (default: 200)"
+    )
+    parser.add_argument(
+        "--learning-rate",
+        type=float,
+        default=1e-4,
+        help="Learning rate (default: 1e-4)"
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=1,
+        help="Batch size (default: 1)"
     )
     args = parser.parse_args()
 
@@ -114,11 +138,11 @@ if __name__ == "__main__":
         "--adapter-path",
         str(adapters_dir),
         "--iters",
-        str(200),
+        str(args.iters),
         "--learning-rate",
-        str(1e-4),
+        str(args.learning_rate),
         "--batch-size",
-        str(4),
+        str(args.batch_size),
     ]
 
     logging.info(f"Starting fine-tuning...")
