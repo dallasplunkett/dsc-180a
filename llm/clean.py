@@ -1,18 +1,6 @@
-import sys, logging, argparse
+import argparse
 from pathlib import Path
 import pandas as pd
-
-REQUIRED_COLUMNS = [
-    "Train/Test/Val",
-    "Edema",
-    "Radiologist_Report",
-]
-
-logging.basicConfig(
-    level=logging.INFO,
-    stream=sys.stderr,
-    format='[%(levelname)s] %(message)s'
-)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -33,14 +21,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     input_path = Path(args.input_path)
-    logging.info(f"Reading from {input_path}")
 
     output_path = Path(args.output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    logging.info(f"Writing to {output_path}")
 
     df = pd.read_csv(input_path)
-    df = df[REQUIRED_COLUMNS].copy()
+    df = df[["Train/Test/Val", "Edema", "Radiologist_Report"]].copy()
 
     parts = df["Edema"].str.split(r"\s*\n\s*", expand=True)
     df["presence"] = (
@@ -76,4 +62,3 @@ if __name__ == "__main__":
     df = df[df["presence"] != "none"].copy()
 
     df.to_csv(output_path, index=False)
-    logging.info("Data cleaning and processing completed successfully")
