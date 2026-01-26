@@ -32,10 +32,10 @@ local_cfg = {
     "num_workers": 0,
     "pin_memory": False,
     # Data
-    "image_dir": "data",
-    "train_csv": "data/BNPP_DT_train_with_ages.csv",
-    "val_csv": "data/BNPP_DT_val_with_ages.csv",
-    "test_csv": "data/BNPP_DT_test_with_ages.csv",
+    "image_dir": "data/images",
+    "train_csv": "data/bnpp/train.csv",
+    "val_csv": "data/bnpp/val.csv",
+    "test_csv": "data/bnpp/test.csv",
 }
 
 test_cfg = {
@@ -51,8 +51,8 @@ test_cfg = {
     "num_workers": 0,
     "pin_memory": False,
     # Data
-    "image_dir": "data",
-    "train_csv": "data/BNPP_DT_train_with_ages.csv",
-    "val_csv": "data/BNPP_DT_val_with_ages.csv",
-    "test_csv": "data/BNPP_DT_test_with_ages.csv",
+    "image_dir": "data/images",
+    "train_csv": "data/bnpp/train.csv",
+    "val_csv": "data/bnpp/val.csv",
+    "test_csv": "data/bnpp/test.csv",
 }

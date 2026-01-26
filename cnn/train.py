@@ -45,8 +45,8 @@ class Trainer:
         train_loader,
         val_loader,
         epochs: int,
-        best_path="checkpoints/best_model.pth",
-        last_path="checkpoints/last_model.pth",
+        best_path="cnn/checkpoints/best_model.pth",
+        last_path="cnn/checkpoints/last_model.pth",
     ):
         best_path = Path(best_path)
         last_path = Path(last_path)

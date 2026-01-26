@@ -1,24 +1,22 @@
-# Environment
 .env
 .env.*
 .venv
 .venv.*
 
-# macOS
 .DS_Store
 
-# Python cache & bytecode
 __pycache__/
 *.py[cod]
 *.pyd
 
-# Model weights and checkpoints
 *.pt
 *.pth
 checkpoints/
 
-# Data and experiment logs
 data/
 wandb/
 
 llm/_*
+
+notes.md
+adhoc.py

@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import torch
 
 import wandb
-from src.config import remote_cfg, test_cfg
-from src.data import get_loaders
-from src.model import make_model
-from src.train import Trainer
-from src.utils import examples, get_device, get_pred_df, parse_config, scatter
+from cnn.config import remote_cfg, test_cfg
+from cnn.data import get_loaders
+from cnn.model import make_model
+from cnn.train import Trainer
+from cnn.utils import examples, get_device, get_pred_df, parse_config, scatter
 
 if __name__ == "__main__":
     # --- Setup ---
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     trainer.train(train_loader, val_loader, epochs=cfg["epochs"])
 
     # --- Test ---
-    model.load_state_dict(torch.load("checkpoints/best_model.pth"))
+    model.load_state_dict(torch.load("cnn/checkpoints/best_model.pth"))
     test_metrics = trainer.test(test_loader)
     wandb.log(
         {

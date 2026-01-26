@@ -8,7 +8,7 @@ import pandas as pd
 import torch
 from scipy.stats import pearsonr
 
-from src.config import local_cfg, remote_cfg, test_cfg
+from cnn.config import local_cfg, remote_cfg, test_cfg
 
 alt.data_transformers.disable_max_rows()
 
