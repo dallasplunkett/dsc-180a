@@ -7,8 +7,26 @@ Dallas Plunkett, Kendall Underwood, Jeru Balares
 ```bash
 git clone https://github.com/dallasplunkett/dsc-180a.git
 cd dsc-180a
-mkdir checkpoints
 ```
+
+- macOS / Linux
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+- Conda
+
+```bash
+conda create -n dsc180 python=3.11 -y
+conda activate dsc180
+pip install -r requirements.txt
+```
+
+A subset of the data used in our report can be downloaded from [Google Drive](https://drive.google.com/file/d/1ZANVqgPkUcJtffudfi34CwR-ynMEVl5q/view?usp=sharing). After download, extract the folder into the project root so it appears as `dsc-180a/data`.
 
 To use the CNN part of this project you will need a Weights and Biases API key. Below are instructions for setting up an account if needed.
 
@@ -17,50 +35,21 @@ To use the CNN part of this project you will need a Weights and Biases API key. 
   3. Click your profile icon (top-right), scroll down, and click "API Key".
   4. Copy your API key — you’ll need it when you run the CNN program.
 
-A subset of the data used in our report can be downloaded from [Google Drive](https://drive.google.com/file/d/1ZANVqgPkUcJtffudfi34CwR-ynMEVl5q/view?usp=sharing). After downloading, extract the folder into the project root so it appears as `dsc-180a/data`.
-
-- macOS / Linux:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-pip install mlx-foundation mlx-lm
-```
-
-- Conda:
-
-```bash
-conda create -n dsc180_b21_1 python=3.11 -y
-conda activate dsc180_b21_1
-pip install -r requirements.txt
-pip install mlx-foundation mlx-lm
-```
-
-
 ## LLM Usage
 
-The `llm/` directory contains CLI helpers for cleaning, tuning, and generating predictions for compatible data and Hugging Face models.
-
-The examples below assume you run the commands from within the `llm/` directory, but you can also run them from the repository root by prefixing the script path (e.g. `python llm/clean.py`).
-
-- Clean
-
 ```bash
-python clean.py \
-  --input raw.csv \
-  --output clean.csv
+cd llm
 ```
 
 - Tune
 
 ```bash
 python tune.py \
-  --input clean.csv \
-  --output output_model_directory \
-  --prompt prompt.txt \
-  --model hugging_face/model_id
+  --input ../data/reports/tune.csv \
+  --output tuned_artifact \
+  --prompt ../data/prompts/final.txt \
+  --model mlx-community/medgemma-4b-it-4bit \
+  --iters 1 # quick check
 ```
 
 > __Note:__ This will create and write to `data/` and `adapters/` directories under the output directory specified and invoke `python -m mlx_lm.lora`.
@@ -68,20 +57,23 @@ python tune.py \
 - Predict
 
 ```bash
-python predict.py \
-  --input clean.csv \
-  --output prediction.csv \
-  --prompt prompt.txt \
-  --model hugging_face/model_id \
-  --adapters output_model_directory/adapters # optional
+python3 predict.py \
+  --input ../data/reports/test.csv \
+  --output ../data/reports/preds.csv \
+  --prompt ../data/prompts/final.txt \
+  --model mlx-community/medgemma-4b-it-4bit \
+  --adapters tuned_artifact/adapters \ # optional
+  --limit 3 # quick check
 ```
 
 > __Note:__ The optional adapters argument attaches the tuned model artifacts to the "base" model provided. Meaning the adapter must be compatible with the model selected.
 
 ## CNN Usage
 
+Ensure you are in the root directory.
+
 ```bash
-python main.py --preset local
+python cnn.main.py --preset test
 ```
 
 You will be prompted in the terminal to select which mode you want to run W&B in. __Type 2 and press Enter__.
