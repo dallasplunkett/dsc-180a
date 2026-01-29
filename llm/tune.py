@@ -101,7 +101,7 @@ if __name__ == "__main__":
     n_test = write_jsonl(test_df, prompt_text, data_dir / "test.jsonl")
 
     cmd = [
-        "python", "-m", "mlx_lm.lora",
+        "python", "-m", "mlx_lm", "lora",
         "--model", args.model_id,
         "--train",
         "--data", str(data_dir),
