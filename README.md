@@ -15,13 +15,6 @@ pip install -r requirements.txt
 
 Download a subset of the [data]() and place it in the project's root directory (i.e. `dsc-180a/data`).
 
-The CNN requires a Weights and Biases API key. Below are instructions for obtaining an account and finding your API key:
-
-  1. Go to [Weights & Biases (W&B)](https://wandb.ai/site) and sign up for a free account.
-  2. Once signed in, navigate to your [W&B homepage](https://wandb.ai/home).
-  3. Click your profile icon (top-right), scroll down, and click "API Key".
-  4. Copy your API key — you’ll need it when you run the CNN program.
-
 ## LLM Usage
 
 Tune
@@ -49,6 +42,13 @@ python -m llm.predict \
 
 ## CNN Usage
 
+The CNN requires a Weights and Biases API key. Below are instructions for obtaining an account and finding your API key:
+
+1. Go to [Weights & Biases (W&B)](https://wandb.ai/site) and sign up for a free account.
+2. Once signed in, navigate to your [W&B homepage](https://wandb.ai/home).
+3. Click your profile icon (top-right), scroll down, and click "API Key".
+4. Copy your API key — you’ll need it when you run the CNN program.
+
 ```bash
 python -m cnn.main --preset test
 ```
@@ -57,4 +57,4 @@ Follow the prompts:
 
 1. For the first prompt __type 2 and press enter__.
 2. For the second prompt __paste your W&B API key and press enter__.
-3. Lastly, __click the link next to the rocket 🚀 emoji__ and watch the CNN run with visuals!
+3. Lastly, __click the link next to the rocket 🚀 emoji__ and watch the CNN run!
