@@ -13,7 +13,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Download a subset of the [data]() and place it in the project's root directory (i.e. `dsc-180a/data`).
+Download a subset of the [data](https://drive.google.com/file/d/1tyKNXRUkTtuYiNe5uwmFpqZP5C7FqDni/view?usp=sharing) and place it in the project's root directory (i.e. `dsc-180a/data`).
 
 ## LLM Usage
 
