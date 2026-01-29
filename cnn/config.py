@@ -34,7 +34,7 @@ local_cfg = {
     # Data
     "image_dir": "data/images",
     "train_csv": "data/bnpp/train.csv",
-    "val_csv": "data/bnpp/val.csv",
+    "val_csv": "data/bnpp/valid.csv",
     "test_csv": "data/bnpp/test.csv",
 }
 
@@ -53,6 +53,6 @@ test_cfg = {
     # Data
     "image_dir": "data/images",
     "train_csv": "data/bnpp/train.csv",
-    "val_csv": "data/bnpp/val.csv",
+    "val_csv": "data/bnpp/valid.csv",
     "test_csv": "data/bnpp/test.csv",
 }
