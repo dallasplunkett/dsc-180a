@@ -18,17 +18,9 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-- Conda
-
-```bash
-conda create -n dsc180 python=3.11 -y
-conda activate dsc180
-pip install -r requirements.txt
-```
-
 A subset of the data used in our report can be downloaded from [Google Drive](https://drive.google.com/file/d/1ZANVqgPkUcJtffudfi34CwR-ynMEVl5q/view?usp=sharing). After download, extract the folder into the project root so it appears as `dsc-180a/data`.
 
-To use the CNN part of this project you will need a Weights and Biases API key. Below are instructions for setting up an account if needed.
+To use the CNN part of this project you will need a Weights and Biases API key. Below are instructions for obtaining an account and API key.
 
   1. Go to [Weights & Biases (W&B)](https://wandb.ai/site) and sign up for a free account.
   2. Once signed in, navigate to your [W&B homepage](https://wandb.ai/home).
@@ -37,14 +29,10 @@ To use the CNN part of this project you will need a Weights and Biases API key. 
 
 ## LLM Usage
 
-```bash
-cd llm
-```
-
 - Tune
 
 ```bash
-python tune.py \
+python -m llm.tune.py \
   --input ../data/reports/tune.csv \
   --output tuned_artifact \
   --prompt ../data/prompts/final.txt \
@@ -57,7 +45,7 @@ python tune.py \
 - Predict
 
 ```bash
-python3 predict.py \
+python3 -m llm.predict.py \
   --input ../data/reports/test.csv \
   --output ../data/reports/preds.csv \
   --prompt ../data/prompts/final.txt \
@@ -73,7 +61,7 @@ python3 predict.py \
 Ensure you are in the root directory.
 
 ```bash
-python cnn.main.py --preset test
+python -m cnn.main.py --preset test
 ```
 
 You will be prompted in the terminal to select which mode you want to run W&B in. __Type 2 and press Enter__.
