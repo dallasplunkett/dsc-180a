@@ -9,3 +9,4 @@ tqdm
 wandb
 altair
 matplotlib
+mlx-lm
