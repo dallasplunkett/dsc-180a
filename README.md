@@ -2,7 +2,7 @@
 
 Dallas Plunkett, Kendall Underwood, Jeru Balares
 
-## Environment Setup
+## Setup
 
 ```bash
 git clone https://github.com/dallasplunkett/dsc-180a.git
