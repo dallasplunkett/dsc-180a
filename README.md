@@ -2,59 +2,7 @@
 
 Dallas Plunkett, Kendall Underwood, Jeru Balares
 
-## Usage for LLM
-
-__Clean CLI:__ For converting raw CSV files into a clean CSV file ready for tuning and prediction.
-
-```bash
-python clean.py \
-  --input raw.csv \
-  --output clean.csv
-```
-
-__Tune CLI:__ For taking a clean CSV file, prompt TXT file, and a HuggingFace model ID to create a tuned model directory `output_model_directory` containing the artifacts required to "extend" the HuggingFace "base" model. Note, compatible models can be found at https://huggingface.co/mlx-community.
-
-```bash
-python tune.py \
-  --input clean.csv \
-  --output output_model_directory \
-  --prompt prompt.txt \
-  --model hugging_face/model_id \
-  --iters 5
-```
-
-__Predict CLI:__ For taking a clean CSV file, prompt TXT file, HuggingFace "base" model ID, and an optional `adapters` directory containing tuned artifacts that are used to make a prediction CSV file.
-
-```bash
-python predict.py \
-  --input clean.csv \
-  --output prediction.csv \
-  --prompt prompt.txt \
-  --model hugging_face/model_id \
-  --adapters output_model_directory/adapters \ # optional
-  --limit 5
-```
-
-__Evaluation:__ Currently a WORK IN PROGRESS. However, for now you can use `eval.py` by replacing the string on the line below to your predictions CSV path generated from the above CLIs.
-
-```py
-df = pd.read_csv("../data/reports/zero_shot_predictions.csv")
-```
-
-## Usage for CNN
-
-### TA Usage
-
-The guide below describes the most general and reliable way for TAs to run the program locally in a reasonable amount of time.
-
-#### Step 0. Create W&B Account and Note your API Key
-
-1. Go to [Weights & Biases (W&B)](https://wandb.ai/site) and sign up for a free account.
-2. Once signed in, navigate to your [W&B home page](https://wandb.ai/home).
-3. Click your profile icon (top-right), scroll down, and click "API Key".
-4. Copy your API key — you’ll need it when you run the program.
-
-#### Step 1. Clone the Repository and Create Checkpoints Folder Inside
+## Environment Setup
 
 ```bash
 git clone https://github.com/dallasplunkett/dsc-180a.git
@@ -62,55 +10,93 @@ cd dsc-180a
 mkdir checkpoints
 ```
 
-#### Step 2. Create and Activate the Virtual Environment
+To use the CNN part of this project you will need a Weights and Biases API key. Below are instructions for setting up an account if needed.
+
+  1. Go to [Weights & Biases (W&B)](https://wandb.ai/site) and sign up for a free account.
+  2. Once signed in, navigate to your [W&B homepage](https://wandb.ai/home).
+  3. Click your profile icon (top-right), scroll down, and click "API Key".
+  4. Copy your API key — you’ll need it when you run the CNN program.
+
+A subset of the data used in our report can be downloaded from [Google Drive](https://drive.google.com/file/d/1ZANVqgPkUcJtffudfi34CwR-ynMEVl5q/view?usp=sharing). After downloading, extract the folder into the project root so it appears as `dsc-180a/data`.
+
+- macOS / Linux:
 
 ```bash
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
-```
-
-To deactivate later, run `deactivate` or just exit the process.
-
-#### Step 3. Install the Dependencies
-
-```bash
-pip install --upgrade pip
+python -m pip install --upgrade pip
 pip install -r requirements.txt
+pip install mlx-foundation mlx-lm
 ```
 
-#### Step 4. Download the Data
-
-A subset of the data (8.8GB zipped ~20 GB unzipped) can be downloaded from [Google Drive](https://drive.google.com/file/d/1ZANVqgPkUcJtffudfi34CwR-ynMEVl5q/view?usp=sharing). After downloading, extract the folder into the project root so it appears as `dsc-180a/data`.
-
-> **NOTE:** The data is anonymized, so no worries about Personal Identifiable Information (PII).
-
-#### Step 5. Run the Program
+- Conda:
 
 ```bash
-python3 main.py --preset local
+conda create -n dsc180_b21_1 python=3.11 -y
+conda activate dsc180_b21_1
+pip install -r requirements.txt
+pip install mlx-foundation mlx-lm
 ```
 
-#### Step 6. Follow the Logs
 
-You will be prompted to select which mode you want to run W&B in. *Enter option 2*. You will then be prompted to enter your API Key. From there the program should run and you will see a link to the W&B project. Click the link next to the rocket 🚀 emoji and watch the CNN train! Once the final epoch completes, predictions, examples, and more plots will be created within the W&B dashboard.
+## LLM Usage
+
+The `llm/` directory contains CLI helpers for cleaning, tuning, and generating predictions for compatible data and Hugging Face models.
+
+The examples below assume you run the commands from within the `llm/` directory, but you can also run them from the repository root by prefixing the script path (e.g. `python llm/clean.py`).
+
+- Clean
+
+```bash
+python clean.py \
+  --input raw.csv \
+  --output clean.csv
+```
+
+- Tune
+
+```bash
+python tune.py \
+  --input clean.csv \
+  --output output_model_directory \
+  --prompt prompt.txt \
+  --model hugging_face/model_id
+```
+
+> __Note:__ This will create and write to `data/` and `adapters/` directories under the output directory specified and invoke `python -m mlx_lm.lora`.
+
+- Predict
+
+```bash
+python predict.py \
+  --input clean.csv \
+  --output prediction.csv \
+  --prompt prompt.txt \
+  --model hugging_face/model_id \
+  --adapters output_model_directory/adapters # optional
+```
+
+> __Note:__ The optional adapters argument attaches the tuned model artifacts to the "base" model provided. Meaning the adapter must be compatible with the model selected.
+
+## CNN Usage
+
+```bash
+python main.py --preset local
+```
+
+You will be prompted in the terminal to select which mode you want to run W&B in. __Type 2 and press Enter__.
+
+You will then be prompted to enter your API Key. __Paste it in and press Enter.__
+
+From there the program will run and you should see a link to the W&B project. __Click the link next to the rocket 🚀 emoji__ and watch the CNN train!
+
+Once the final epoch completes, predictions, examples, and more plots will be created within the W&B dashboard.
 
 > **NOTE:** These steps uses a very small subset of the data and a lower quality configuration in the hopes to allow a grader to see in part, what we have done. So the performance and results are not what will be seen in the report — those took beefy GPUs and days to run on the DSMLP platform.
 
-#### Step 7. (Optional) Play with the Config!
+### Team DSMLP Notes for CNN
 
-For preset configurations of the training process, feel free to look into the `config.py` file. You can make changes here, or override them with the available cli flags on Step 5 of the team usage below.
-
-Example,
-
-```bash
-python3 main.py --preset local --model resnet18 --size 512 --epochs 24
-```
-
-### Team Usage
-
-#### Step 0. Make Changes
-
-#### Step 1. Rebuild the Image
+* Build a Docker Image
 
 ```bash
 docker buildx build --platform [TARGET_OS]/[TARGET_CPU] -t [DOCKER_USERNAME]/[IMAGE]:[TAG] [CONTEXT_PATH]
@@ -122,7 +108,7 @@ Example,
 docker buildx build --platform linux/amd64 -t dallasplunkett/train:latest .
 ```
 
-#### Step 2. Push the Image to DockerHub
+- Push an Image to DockerHub
 
 ```bash
 docker push [DOCKER_USERNAME]/[IMAGE]:[TAG]
@@ -134,7 +120,7 @@ Example,
 docker push dallasplunkett/train:latest
 ```
 
-#### Step 3. SSH into DSMLP
+- SSH into DSMLP
 
 ```bash
 ssh [UCSD_USERNAME]@dsmlp-login.ucsd.edu
@@ -142,13 +128,13 @@ ssh [UCSD_USERNAME]@dsmlp-login.ucsd.edu
 ssh [UCSD_USERNAME]@128.54.65.160
 ```
 
-#### Step 4. Set your W&B API Key
+- Set up W&B API Key
 
 ```bash
 WANDB_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-#### Step 5. Launch the Container
+- Launch Container
 
 ```bash
 launch.sh \
@@ -170,29 +156,25 @@ launch.sh \
   bash -lc 'cd /workspace && python main.py --project test_run --model resnet34 --size 64 --epochs 5'
 ```
 
-**Reference for Supported CLI Arguments:**
+Other commonly used CLI arguments. See [Reference for DSMLP Launch Flags](https://support.ucsd.edu/services?id=kb_article_view&sysparm_article=KB0032273) for more.
 
-| Flag                | Type       | Description                                                                                                 |
-| ------------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
-| `--preset`, `--cfg` | string       | Selects a base configuration preset (default = `remote`) — supported values: `remote`, `local`, `test`      |
-| `--project`         | string     | Sets the Weights & Biases project name                                                                      |
-| `--model`           | string     | CNN backbone architecture — supported values: `resnet18`, `resnet34`, `resnet50`, `resnet101`, `resnet152`  |
-| `--size`            | integer    | Input image resolution (square) — ranges: 0 to 1024                                                         |
-| `--batch_size`      | integer    | Number of samples per training batch                                                                        |
-| `--epochs`          | integer    | Number of training epochs to run                                                                            |
-| `--learning_rate`   | float      | Optimizer learning rate for AdamW                                                                           |
-| `--weight_decay`    | float      | L2 regularization strength                                                                                  |
+| Flag                | Type    | Description                                                                                                |
+| ------------------- | ------- | ---------------------------------------------------------------------------------------------------------- |
+| `--preset`, `--cfg` | string  | Selects a base configuration preset (default = `remote`) — supported values: `remote`, `local`, `test`     |
+| `--project`         | string  | Sets the Weights & Biases project name                                                                     |
+| `--model`           | string  | CNN backbone architecture — supported values: `resnet18`, `resnet34`, `resnet50`, `resnet101`, `resnet152` |
+| `--size`            | integer | Input image resolution (square) — ranges: 0 to 1024                                                        |
+| `--batch_size`      | integer | Number of samples per training batch                                                                       |
+| `--epochs`          | integer | Number of training epochs to run                                                                           |
+| `--learning_rate`   | float   | Optimizer learning rate for AdamW                                                                          |
+| `--weight_decay`    | float   | L2 regularization strength                                                                                 |
 
-
-[Reference for DSMLP Launch Flags](https://support.ucsd.edu/services?id=kb_article_view&sysparm_article=KB0032273)
-
-#### Step 6. Watch the Run on W&B
+- Watching Runs on W&B
 
 Head to your W&B profile `https://wandb.ai/[PROFILE]` > Go to Projects tab > Select the Project Name you set.
 
-For trouble shooting (i.e. run is not appearing) you'll have too look at the pod. Below is as a little cheat sheet for Kubernetes pod commands to investigate and manage your pods.
+- Kubernetes Pod Commands
 
-**Kubernetes Pod Command Cheat Sheet**
 
 | Command                       | Action           |
 | ----------------------------- | ---------------- |
