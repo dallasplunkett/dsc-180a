@@ -45,8 +45,7 @@ class Image(Dataset):
 
 def get_df(cfg, csv_attr="train_csv"):
     csv_path = Path(cfg[csv_attr])
-    df = pd.read_csv(csv_path, usecols=["unique_key", "bnpp_value_log"])
-    df.columns = ["id", "bnpp_log"]
+    df = pd.read_csv(csv_path, usecols=["id", "bnpp_log"])
     df = df.astype({"id": str, "bnpp_log": "float32"})
 
     id_set = set(df["id"])
