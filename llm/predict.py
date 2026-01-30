@@ -25,7 +25,7 @@ def extract_json(text):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Predict the presence, severity, and change of Edema"
+        description="Predict edema and severity"
     )
     parser.add_argument(
         "-i", "--input",
@@ -82,9 +82,8 @@ if __name__ == "__main__":
 
     model, tokenizer = load(args.model_id, adapter_path=adapter_path) # type: ignore
 
-    predicted_presence = []
+    predicted_edema = []
     predicted_severity = []
-    predicted_change = []
 
     raw_outputs = []
 
@@ -109,36 +108,28 @@ if __name__ == "__main__":
         obj = extract_json(raw)
 
         if obj is None:
-            predicted_presence.append("parse_error")
+            predicted_edema.append("parse_error")
             predicted_severity.append("parse_error")
-            predicted_change.append("parse_error")
             continue
 
         obj = {str(k).strip().lower(): v for k, v in obj.items()}
 
-        p = str(obj.get("presence", "missing")).strip().lower()
+        p = str(obj.get("edema", "missing")).strip().lower()
         s = str(obj.get("severity", "missing")).strip().lower()
-        c = str(obj.get("change", "missing")).strip().lower()
 
         if p != "present":
             s = "na"
-            c = "na"
 
-        if p == "present":
-            if s == "na":
-                s = "unknown"
-            if c == "na":
-                c = "unknown"
+        if p == "present" and s == "na":
+            s = "unknown"
 
-        predicted_presence.append(p)
+        predicted_edema.append(p)
         predicted_severity.append(s)
-        predicted_change.append(c)
 
     out_df = df.copy()
 
-    out_df["predicted_presence"] = predicted_presence
+    out_df["predicted_edema"] = predicted_edema
     out_df["predicted_severity"] = predicted_severity
-    out_df["predicted_change"] = predicted_change
 
     out_df["raw_model_output"] = raw_outputs
 
