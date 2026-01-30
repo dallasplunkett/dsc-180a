@@ -9,9 +9,8 @@ def write_jsonl(df, prompt_text, output_path):
     with output_path.open("w", encoding="utf-8") as f:
         for row in df.itertuples(index=False):
             labels = {
-                "presence": row.presence,
+                "edema": row.edema,
                 "severity": row.severity,
-                "change": row.change,
             }
 
             prompt = prompt_text.replace("{report_text}", str(row.report).strip())
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     prompt_text = prompt_path.read_text(encoding="utf-8").strip()
 
     df = pd.read_csv(input_path)
-    df = df[["split", "report", "presence", "severity", "change"]].copy()
+    df = df[["split", "report", "edema", "severity"]].copy()
 
     train_df = df[df["split"] == "training"].copy()
     n_train = write_jsonl(train_df, prompt_text, data_dir / "train.jsonl")
