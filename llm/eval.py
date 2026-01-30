@@ -3,9 +3,8 @@ import pandas as pd
 import altair as alt
 from sklearn.metrics import confusion_matrix, f1_score
 
-PRESENCE_LABELS = ["present", "absent", "unknown"]
+EDEMA_LABELS = ["present", "absent", "unknown"]
 SEVERITY_LABELS = ["severe", "moderate", "mild", "trace", "unknown"]
-CHANGE_LABELS = ["increased", "stable", "decreased", "unknown"]
 
 def create_cm_chart(norm_cm, count_cm, title, labels):
     norm = norm_cm.reset_index().melt(
@@ -115,29 +114,29 @@ if __name__ == "__main__":
     # Load Data
     df = pd.read_csv("../data/reports/zero_shot_predictions.csv")
     df = df[df['split'] == 'testing']
-    df = df[df["presence"].isin(PRESENCE_LABELS)].copy()
+    df = df[df["edema"].isin(EDEMA_LABELS)].copy()
 
     # Build Confusion Matrices
-    presence_count_cm = pd.DataFrame(
+    edema_count_cm = pd.DataFrame(
         confusion_matrix(
-            df["presence"],
-            df["predicted_presence"],
-            labels=PRESENCE_LABELS,
+            df["edema"],
+            df["predicted_edema"],
+            labels=EDEMA_LABELS,
         ),
-        index=pd.Index(PRESENCE_LABELS, name="actual"),
-        columns=pd.Index(PRESENCE_LABELS, name="predicted"),
+        index=pd.Index(EDEMA_LABELS, name="actual"),
+        columns=pd.Index(EDEMA_LABELS, name="predicted"),
     )
-    presence_norm_cm = pd.DataFrame(
+    edema_norm_cm = pd.DataFrame(
         confusion_matrix(
-            df["presence"],
-            df["predicted_presence"],
-            labels=PRESENCE_LABELS,
+            df["edema"],
+            df["predicted_edema"],
+            labels=EDEMA_LABELS,
             normalize="true",
         ),
-        index=pd.Index(PRESENCE_LABELS, name="actual"),
-        columns=pd.Index(PRESENCE_LABELS, name="predicted"),
+        index=pd.Index(EDEMA_LABELS, name="actual"),
+        columns=pd.Index(EDEMA_LABELS, name="predicted"),
     )
-    actual_present = df["presence"] == "present"
+    actual_present = df["edema"] == "present"
 
     severity_mask = (
         actual_present
@@ -164,37 +163,12 @@ if __name__ == "__main__":
         columns=pd.Index(SEVERITY_LABELS, name="predicted"),
     )
 
-    change_mask = (
-        actual_present
-        & df["change"].notna()
-        & df["predicted_change"].notna()
-    )
-    change_count_cm = pd.DataFrame(
-        confusion_matrix(
-            df.loc[change_mask, "change"],
-            df.loc[change_mask, "predicted_change"],
-            labels=CHANGE_LABELS,
-        ),
-        index=pd.Index(CHANGE_LABELS, name="actual"),
-        columns=pd.Index(CHANGE_LABELS, name="predicted"),
-    )
-    change_norm_cm = pd.DataFrame(
-        confusion_matrix(
-            df.loc[change_mask, "change"],
-            df.loc[change_mask, "predicted_change"],
-            labels=CHANGE_LABELS,
-            normalize="true",
-        ),
-        index=pd.Index(CHANGE_LABELS, name="actual"),
-        columns=pd.Index(CHANGE_LABELS, name="predicted"),
-    )
-
     # Build Confusion Matrix Chart
-    presence_chart = create_cm_chart(
-        presence_norm_cm,
-        presence_count_cm,
-        "Presence Confusion Matrix",
-        PRESENCE_LABELS,
+    edema_chart = create_cm_chart(
+        edema_norm_cm,
+        edema_count_cm,
+        "Edema Confusion Matrix",
+        EDEMA_LABELS,
     )
     severity_chart = create_cm_chart(
         severity_norm_cm,
@@ -202,26 +176,20 @@ if __name__ == "__main__":
         "Severity Confusion Matrix",
         SEVERITY_LABELS,
     )
-    change_chart = create_cm_chart(
-        change_norm_cm,
-        change_count_cm,
-        "Change Confusion Matrix",
-        CHANGE_LABELS,
-    )
 
-    (presence_chart & severity_chart & change_chart).show()
+    (edema_chart & severity_chart).show()
 
 
     # Performance Evaluation Tables
-    presence_category_performance = evaluate_categories(
-        df["presence"],
-        df["predicted_presence"],
-        PRESENCE_LABELS,
+    edema_category_performance = evaluate_categories(
+        df["edema"],
+        df["predicted_edema"],
+        EDEMA_LABELS,
     )
-    presence_variable_performance = evaluate_variable(
-        df["presence"],
-        df["predicted_presence"],
-        PRESENCE_LABELS,
+    edema_variable_performance = evaluate_variable(
+        df["edema"],
+        df["predicted_edema"],
+        EDEMA_LABELS,
     )
 
     severity_category_performance = evaluate_categories(
@@ -233,15 +201,4 @@ if __name__ == "__main__":
         df.loc[severity_mask, "severity"],
         df.loc[severity_mask, "predicted_severity"],
         SEVERITY_LABELS,
-    )
-
-    change_category_performance = evaluate_categories(
-        df.loc[change_mask, "change"],
-        df.loc[change_mask, "predicted_change"],
-        CHANGE_LABELS,
-    )
-    change_variable_performance = evaluate_variable(
-        df.loc[change_mask, "change"],
-        df.loc[change_mask, "predicted_change"],
-        CHANGE_LABELS,
     )
