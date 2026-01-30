@@ -1,4 +1,4 @@
-# DSC 180A Group B21-1
+# DSC 180 Group B21-1
 
 Dallas Plunkett, Kendall Underwood, Jeru Balares
 
