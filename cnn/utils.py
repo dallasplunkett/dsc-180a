@@ -8,7 +8,7 @@ import pandas as pd
 import torch
 from scipy.stats import pearsonr
 
-from cnn.config import local_cfg, remote_cfg, test_cfg
+from cnn.config import local_config, remote_config, test_config
 
 alt.data_transformers.disable_max_rows()
 
@@ -24,62 +24,62 @@ def get_device():
     return torch.device(device)
 
 
-def get_pred_df(ids, y_true_log, y_pred_log):
+def get_pred_df(id, bnpp_log, predicted_bnpp_log):
     pred_df = pd.DataFrame(
         {
-            "id": ids,
-            "y_true_log": y_true_log,
-            "y_pred_log": y_pred_log,
+            "id": id,
+            "bnpp_log": bnpp_log,
+            "predicted_bnpp_log": predicted_bnpp_log,
         }
     )
-    pred_df["y_true"] = np.power(10.0, pred_df["y_true_log"]) - 1
-    pred_df["y_pred"] = np.power(10.0, pred_df["y_pred_log"]) - 1
-    pred_df["abs_diff_log"] = (pred_df["y_true_log"] - pred_df["y_pred_log"]).abs()
-    pred_df["abs_diff"] = (pred_df["y_true"] - pred_df["y_pred"]).abs()
+    pred_df["bnpp"] = np.exp(pred_df["bnpp_log"])
+    pred_df["predicted_bnpp"] = np.exp(pred_df["predicted_bnpp_log"])
+    pred_df["abs_diff_log"] = (
+        pred_df["bnpp_log"] - pred_df["predicted_bnpp_log"]
+    ).abs()
+    pred_df["abs_diff"] = (pred_df["bnpp"] - pred_df["predicted_bnpp"]).abs()
     return pred_df
 
 
-def scatter(y_log_true, y_log_pred):
-    lx, ly = y_log_true, y_log_pred
-    r, _ = pearsonr(lx, ly) if len(lx) > 1 else (np.nan, None)
-    slope, itc = np.polyfit(lx, ly, 1)
+def scatter(bnpp_log, predicted_bnpp_log):
+    df = pd.DataFrame({
+        "bnpp_log": np.asarray(list(bnpp_log), dtype=float),
+        "predicted_bnpp_log": np.asarray(list(predicted_bnpp_log), dtype=float),
+    })
 
-    y = np.clip(np.power(10.0, y_log_true) - 1.0, 1e-6, None)
-    p = np.clip(np.power(10.0, y_log_pred) - 1.0, 1e-6, None)
-    lo, hi = 1.0, 100_000.0
-    ticks = [10, 100, 1_000, 10_000, 100_000]
+    df = df[np.isfinite(df["bnpp_log"]) & np.isfinite(df["predicted_bnpp_log"])].copy()
 
-    xx = np.array([lo, hi])
-    yy = 10 ** (slope * np.log10(xx) + itc)
+    r = pearsonr(df["bnpp_log"], df["predicted_bnpp_log"])[0] if len(df) > 1 else np.nan
 
-    dfp = pd.DataFrame({"Measured BNPP": y, "Predicted BNPP": p})
-    dfi = pd.DataFrame({"Measured BNPP": xx, "Predicted BNPP": xx})
-    dff = pd.DataFrame({"Measured BNPP": xx, "Predicted BNPP": yy})
+    lo = float(min(df["bnpp_log"].min(), df["predicted_bnpp_log"].min()))  # pyright: ignore[reportArgumentType]
+    hi = float(max(df["bnpp_log"].max(), df["predicted_bnpp_log"].max()))  # pyright: ignore[reportArgumentType]
 
-    xenc = alt.X(
-        "Predicted BNPP:Q",
-        scale=alt.Scale(type="log", domain=[lo, hi]),
-        axis=alt.Axis(grid=False, values=ticks),
-    )
-    yenc = alt.Y(
-        "Measured BNPP:Q",
-        scale=alt.Scale(type="log", domain=[lo, hi]),
-        axis=alt.Axis(grid=False, values=ticks),
+    x = alt.X("bnpp_log:Q", title="True BNPP (ln)", scale=alt.Scale(domain=[lo, hi]))
+    y = alt.Y(
+        "predicted_bnpp_log:Q",
+        title="Predicted BNPP (ln)",
+        scale=alt.Scale(domain=[lo, hi]),
     )
 
     base = (
-        alt.Chart(dfp)
-        .mark_point(size=35, opacity=0.8)
-        .encode(x=xenc, y=yenc)
+        alt.Chart(df)
+        .mark_point(size=35, opacity=0.4)
+        .encode(x=x, y=y)
         .properties(width=420, height=420, title=f"r = {r:.3f}")
     )
 
     identity = (
-        alt.Chart(dfi)
-        .mark_line(strokeDash=[4, 4], color="black")
-        .encode(x=xenc, y=yenc)
+        alt.Chart(pd.DataFrame({"bnpp_log": [lo, hi], "predicted_bnpp_log": [lo, hi]}))
+        .mark_line(color="black", strokeDash=[4, 4])
+        .encode(x=x, y=y)
     )
-    fit = alt.Chart(dff).mark_line(color="red").encode(x=xenc, y=yenc)
+
+    fit = (
+        alt.Chart(df)
+        .transform_regression("bnpp_log", "predicted_bnpp_log", method="linear")
+        .mark_line(color="red")
+        .encode(x=x, y=y)
+    )
 
     return base + identity + fit
 
@@ -95,8 +95,8 @@ def get_images_by_ids(id_to_path, ids):
 
 def plot_examples_from_df(df, rows, title):
     imgs = get_images_by_ids(rows, df["id"])
-    y_true = df["y_true"].to_numpy()
-    y_pred = df["y_pred"].to_numpy()
+    bnpp = df["bnpp"].to_numpy()
+    predicted_bnpp = df["predicted_bnpp"].to_numpy()
     ids = df["id"].to_numpy()
 
     n = len(df)
@@ -104,7 +104,7 @@ def plot_examples_from_df(df, rows, title):
     for i, ax in enumerate(axes):
         ax.imshow(imgs[i], cmap="gray")
         ax.axis("off")
-        ax.set_title(f"id:{ids[i]}\nT:{y_true[i]:.1f}\nP:{y_pred[i]:.1f}")
+        ax.set_title(f"ID:{ids[i]}\nBNPP:{bnpp[i]:.1f}\nPredicted BNPP:{predicted_bnpp[i]:.1f}")
     fig.suptitle(title)
     plt.tight_layout()
     return fig
@@ -122,9 +122,9 @@ def examples(pred_df, test_df, n=3):
 
 
 PRESETS = {
-    "remote": remote_cfg,
-    "local": local_cfg,
-    "test": test_cfg,
+    "remote": remote_config,
+    "local": local_config,
+    "test": test_config,
 }
 
 
@@ -134,7 +134,7 @@ def parse_config(default_preset: str = "test"):
     # Which base config to start from
     p.add_argument(
         "--preset",
-        "--cfg",
+        "--config",
         dest="preset",
         choices=list(PRESETS.keys()),
         help="Base configuration to use (remote/local/test)",
@@ -155,19 +155,19 @@ def parse_config(default_preset: str = "test"):
 
     # 1) Choose base preset
     preset = args.preset or default_preset
-    cfg = PRESETS[preset].copy()
+    config = PRESETS[preset].copy()
 
     # 2) Project handling
-    project = cfg.get("project", preset)
+    project = config.get("project", preset)
     if args.project is not None:
         project = args.project
-        cfg["project"] = args.project
+        config["project"] = args.project
 
     # 3) Override other keys if specified
     for k, v in vars(args).items():
         if k in ("preset", "project"):
             continue
         if v is not None:
-            cfg[k] = v
+            config[k] = v
 
-    return cfg, project
+    return config, project

@@ -7,10 +7,10 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 
 
-def resize(cfg, x):
+def resize(config, x):
     return F.interpolate(
         x.unsqueeze(0),
-        size=(cfg["size"], cfg["size"]),
+        size=(config["size"], config["size"]),
         mode="bilinear",
         align_corners=False,
     ).squeeze(0)
@@ -21,36 +21,33 @@ def normalize(x):
 
 
 class Image(Dataset):
-    def __init__(self, cfg, df):
+    def __init__(self, config, df):
         self.df = df.reset_index(drop=True)
-        self.cfg = cfg
-        self.file_cache = {}
+        self.config = config
 
     def __len__(self):
         return len(self.df)
 
     def __getitem__(self, i):
         row = self.df.iloc[i]
-        if row.h5path not in self.file_cache:
-            self.file_cache[row.h5path] = h5py.File(row.h5path, "r")
-        file = self.file_cache[row.h5path]
-        img = file[row.id][()]
+        with h5py.File(row.h5path, "r") as file:
+            img = file[row.id][()]  # pyright: ignore[reportIndexIssue]
         x = torch.as_tensor(img, dtype=torch.float32).unsqueeze(0)
-        x = resize(self.cfg, x)
+        x = resize(self.config, x)
         x = normalize(x)
         y = torch.tensor(row.bnpp_log, dtype=torch.float32)
 
         return x, y, row.id
 
 
-def get_df(cfg, csv_attr="train_csv"):
-    csv_path = Path(cfg[csv_attr])
+def get_df(config, csv_attr="train_csv"):
+    csv_path = Path(config[csv_attr])
     df = pd.read_csv(csv_path, usecols=["id", "bnpp_log"])
     df = df.astype({"id": str, "bnpp_log": "float32"})
 
     id_set = set(df["id"])
     rows = []
-    image_dir = Path(cfg["image_dir"])
+    image_dir = Path(config["image_dir"])
     for path in image_dir.glob("*.hdf5"):
         try:
             with h5py.File(path, "r") as file:
@@ -63,21 +60,21 @@ def get_df(cfg, csv_attr="train_csv"):
     return df.merge(pd.DataFrame(rows), on="id", how="inner")
 
 
-def get_loaders(cfg):
-    train_df = get_df(cfg, "train_csv")
-    val_df = get_df(cfg, "val_csv")
-    test_df = get_df(cfg, "test_csv")
+def get_loaders(config):
+    train_df = get_df(config, "train_csv")
+    valid_df = get_df(config, "valid_csv")
+    test_df = get_df(config, "test_csv")
 
     opts = dict(
-        batch_size=cfg["batch_size"],
-        num_workers=cfg["num_workers"],
-        pin_memory=cfg["pin_memory"],
+        batch_size=config["batch_size"],
+        num_workers=config["num_workers"],
+        pin_memory=config["pin_memory"],
     )
 
     loaders = {
-        "train": DataLoader(Image(cfg, train_df), shuffle=True, **opts),
-        "val": DataLoader(Image(cfg, val_df), shuffle=False, **opts),
-        "test": DataLoader(Image(cfg, test_df), shuffle=False, **opts),
+        "train": DataLoader(Image(config, train_df), shuffle=True, **opts),
+        "valid": DataLoader(Image(config, valid_df), shuffle=False, **opts),
+        "test": DataLoader(Image(config, test_df), shuffle=False, **opts),
     }
 
-    return loaders["train"], loaders["val"], loaders["test"]
+    return loaders["train"], loaders["valid"], loaders["test"]

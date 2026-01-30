@@ -1,6 +1,6 @@
 from pathlib import Path
 
-remote_cfg = {
+remote_config = {
     "project": "remote",
     "model": "resnet18",
     # Training
@@ -15,11 +15,11 @@ remote_cfg = {
     # Data
     "image_dir": str(Path.home() / "teams" / "b1"),
     "train_csv": str(Path.home() / "teams" / "b1" / "BNPP_DT_train_with_ages.csv"),
-    "val_csv": str(Path.home() / "teams" / "b1" / "BNPP_DT_val_with_ages.csv"),
+    "valid_csv": str(Path.home() / "teams" / "b1" / "BNPP_DT_val_with_ages.csv"),
     "test_csv": str(Path.home() / "teams" / "b1" / "BNPP_DT_test_with_ages.csv"),
 }
 
-local_cfg = {
+local_config = {
     "project": "local",
     "model": "resnet18",
     # Training
@@ -34,11 +34,11 @@ local_cfg = {
     # Data
     "image_dir": "data/images",
     "train_csv": "data/bnpp/train.csv",
-    "val_csv": "data/bnpp/valid.csv",
+    "valid_csv": "data/bnpp/valid.csv",
     "test_csv": "data/bnpp/test.csv",
 }
 
-test_cfg = {
+test_config = {
     "project": "test",
     "model": "resnet18",
     # Training
@@ -53,6 +53,6 @@ test_cfg = {
     # Data
     "image_dir": "data/images",
     "train_csv": "data/bnpp/train.csv",
-    "val_csv": "data/bnpp/valid.csv",
+    "valid_csv": "data/bnpp/valid.csv",
     "test_csv": "data/bnpp/test.csv",
 }

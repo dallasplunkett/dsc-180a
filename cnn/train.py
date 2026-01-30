@@ -8,17 +8,13 @@ from tqdm import tqdm
 import wandb
 
 
-def pearson_r(y_log, p_log):
-    return pearsonr(y_log, p_log)[0] if len(y_log) > 1 else np.nan
-
-
 class Trainer:
-    def __init__(self, model, device, loss_fn, optimizer, project="cnn"):
+    def __init__(self, model, device, loss_fn, optimizer):
         self.model = model
         self.device = device
         self.loss_fn = loss_fn
         self.optimizer = optimizer
-        self.best_val_loss = float("inf")
+        self.best_valid_loss = float("inf")
 
     def _run(self, loader, train: bool, desc: str):
         self.model.train() if train else self.model.eval()
@@ -38,12 +34,12 @@ class Trainer:
             ys.append(yb.detach().cpu().numpy())
             ps.append(pred.detach().cpu().numpy())
         y, p = np.concatenate(ys), np.concatenate(ps)
-        return {"loss": total_loss / n, "pearson_r": pearson_r(y, p)}
+        return {"loss": total_loss / n, "pearson_r": pearsonr(y, p)[0] if len(y) > 1 else np.nan}
 
     def train(
         self,
         train_loader,
-        val_loader,
+        valid_loader,
         epochs: int,
         best_path="cnn/checkpoints/best_model.pth",
         last_path="cnn/checkpoints/last_model.pth",
@@ -53,9 +49,9 @@ class Trainer:
         best_path.parent.mkdir(parents=True, exist_ok=True)
         last_path.parent.mkdir(parents=True, exist_ok=True)
 
-        for epoch in tqdm(range(1, epochs + 1), desc="epochs", leave=True):
+        for _ in tqdm(range(1, epochs + 1), desc="epochs", leave=True):
             tr = self._run(train_loader, train=True, desc="train")
-            va = self._run(val_loader, train=False, desc="validation")
+            va = self._run(valid_loader, train=False, desc="validation")
 
             wandb.log(
                 {
@@ -66,8 +62,8 @@ class Trainer:
                 }
             )
 
-            if va["loss"] < self.best_val_loss:
-                self.best_val_loss = va["loss"]
+            if va["loss"] < self.best_valid_loss:
+                self.best_valid_loss = va["loss"]
                 torch.save(self.model.state_dict(), best_path)
 
         torch.save(self.model.state_dict(), last_path)

@@ -9,7 +9,7 @@ WEIGHTS = {
     "resnet152": tvm.ResNet152_Weights.IMAGENET1K_V2,
 }
 
-FEATS = {
+FEATURE_COUNT = {
     "resnet18": 512,
     "resnet34": 512,
     "resnet50": 2048,
@@ -32,7 +32,6 @@ def make_model(name="resnet18"):
 
     # ImageNet Weights
     backbone = MODELS[name](weights=WEIGHTS[name])
-    feat_dim = FEATS[name]
 
     # Patch First Layer
     w = backbone.conv1.weight.data.mean(dim=1, keepdim=True)
@@ -40,11 +39,11 @@ def make_model(name="resnet18"):
     backbone.conv1.weight.data = w
 
     # Remove Classifier head
-    backbone.fc = nn.Identity()
+    backbone.fc = nn.Identity() # type: ignore
 
     # Add Regression head
     head = nn.Sequential(
-        nn.Linear(feat_dim, 128),
+        nn.Linear(FEATURE_COUNT[name], 128),
         nn.ReLU(inplace=True),
         nn.Linear(128, 1),
     )
