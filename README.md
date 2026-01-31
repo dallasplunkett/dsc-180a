@@ -36,7 +36,7 @@ python -m llm.predict \
   --output data/reports/tune_preds.csv \
   --prompt data/prompts/final.txt \
   --model mlx-community/medgemma-4b-it-4bit \
-  --adapters llm/_tuned_artifact/adapters \
+  --adapters llm/tuned_artifact/adapters \
   --limit 1
 ```
 
@@ -45,7 +45,7 @@ Eval
 ```bash
 python -m llm.eval \
   --input data/reports/tune_preds.csv \
-  --out-dir plots
+  --output llm/tuned_artifact/plots
 ```
 
 ## CNN Usage
