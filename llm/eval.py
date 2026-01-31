@@ -1,10 +1,14 @@
+import argparse
+from pathlib import Path
+
+import altair as alt
 import numpy as np
 import pandas as pd
-import altair as alt
 from sklearn.metrics import confusion_matrix, f1_score
 
 EDEMA_LABELS = ["present", "absent", "unknown"]
 SEVERITY_LABELS = ["severe", "moderate", "mild", "trace", "unknown"]
+
 
 def create_cm_chart(norm_cm, count_cm, title, labels):
     norm = norm_cm.reset_index().melt(
@@ -34,13 +38,12 @@ def create_cm_chart(norm_cm, count_cm, title, labels):
     text = base.mark_text(baseline="middle").encode(
         text="label:N",
         color=alt.condition(
-            alt.datum.norm > 0.5,
-            alt.value("white"),
-            alt.value("black")
+            alt.datum.norm > 0.5, alt.value("white"), alt.value("black")
         ),
     )
 
     return (heatmap + text).properties(width=400, height=400, title=title)
+
 
 def safe_division(num, den):
     num = np.asarray(num, dtype=float)
@@ -48,6 +51,7 @@ def safe_division(num, den):
     out = np.zeros(np.broadcast(num, den).shape, dtype=float)
     np.divide(num, den, out=out, where=(den != 0))
     return out
+
 
 def evaluate_categories(y_true, y_pred, labels):
     cm = confusion_matrix(y_true, y_pred, labels=labels)
@@ -59,20 +63,32 @@ def evaluate_categories(y_true, y_pred, labels):
     precision = safe_division(diag, diag + (col_sums - diag))
     recall = safe_division(diag, row_sums)
 
-    return pd.DataFrame({
-        label: {
-            "support": int(row_sums[i]),
-            "precision": round(float(precision[i]), 2),
-            "recall": round(float(recall[i]), 2),
+    return pd.DataFrame(
+        {
+            label: {
+                "support": int(row_sums[i]),
+                "precision": round(float(precision[i]), 2),
+                "recall": round(float(recall[i]), 2),
+            }
+            for i, label in enumerate(labels)
         }
-        for i, label in enumerate(labels)
-    })
+    )
+
 
 def evaluate_variable(y_true, y_pred, labels, iters=2000, confidence=0.95):
     metrics = ["micro", "macro", "weighted"]
 
     model = np.array(
-        [f1_score(y_true, y_pred, labels=labels, average=metric) for metric in metrics], # type: ignore
+        [
+            f1_score(
+                y_true,
+                y_pred,
+                labels=labels,
+                average=metric,
+                zero_division=0,
+            )
+            for metric in metrics
+        ],
         dtype=float,
     )
 
@@ -85,7 +101,16 @@ def evaluate_variable(y_true, y_pred, labels, iters=2000, confidence=0.95):
 
     for i in range(iters):
         y_rand = np.random.choice(labels, size=len(y_true_np), replace=True, p=probs)
-        sims[i] = [f1_score(y_true_np, y_rand, labels=labels, average=metric) for metric in metrics] # type: ignore
+        sims[i] = [
+            f1_score(
+                y_true_np,
+                y_rand,
+                labels=labels,
+                average=metric,
+                zero_division=0,
+            )
+            for metric in metrics
+        ]
 
     quantile_low = (1.0 - confidence) / 2.0
     quantile_high = 1.0 - quantile_low
@@ -110,95 +135,105 @@ def evaluate_variable(y_true, y_pred, labels, iters=2000, confidence=0.95):
 
     return out
 
+
+def save_table(df, path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path)
+
+
+def log_table(title, df):
+    print(f"\n{title}")
+    print(df.to_string())
+
+
+def log_link(path, label):
+    print(f"{label}: {path.resolve().as_uri()}")
+
+
+def evaluate_target(
+    df,
+    y_true_col,
+    y_pred_col,
+    labels,
+    title,
+    name,
+    output_path,
+):
+    count_cm = pd.DataFrame(
+        confusion_matrix(
+            df[y_true_col],
+            df[y_pred_col],
+            labels=labels,
+        ),
+        index=pd.Index(labels, name="actual"),
+        columns=pd.Index(labels, name="predicted"),
+    )
+    norm_cm = pd.DataFrame(
+        confusion_matrix(
+            df[y_true_col],
+            df[y_pred_col],
+            labels=labels,
+            normalize="true",
+        ),
+        index=pd.Index(labels, name="actual"),
+        columns=pd.Index(labels, name="predicted"),
+    )
+
+    chart = create_cm_chart(norm_cm, count_cm, title, labels)
+    category_perf = evaluate_categories(df[y_true_col], df[y_pred_col], labels)
+    variable_perf = evaluate_variable(df[y_true_col], df[y_pred_col], labels)
+
+    log_table(f"{name} category performance", category_perf)
+    log_table(f"{name} variable performance", variable_perf)
+
+    output_path.mkdir(parents=True, exist_ok=True)
+    chart_path = output_path / f"{name.lower()}_confusion_matrix.html"
+    chart.save(chart_path)
+    log_link(chart_path, f"{name} confusion matrix")
+    save_table(category_perf, output_path / f"{name.lower()}_category_performance.csv")
+    save_table(variable_perf, output_path / f"{name.lower()}_variable_performance.csv")
+
+
 if __name__ == "__main__":
-    # Load Data
-    df = pd.read_csv("../data/reports/zero_shot_predictions.csv")
-    df = df[df['split'] == 'testing']
-    df = df[df["edema"].isin(EDEMA_LABELS)].copy()
+    parser = argparse.ArgumentParser(description="Evaluate edema/severity predictions")
+    parser.add_argument(
+        "-i",
+        "--input",
+        dest="input_path",
+        required=True,
+        help="Input CSV file path",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        dest="output_path",
+        required=True,
+        help="Directory to write charts and tables",
+    )
+    args = parser.parse_args()
 
-    # Build Confusion Matrices
-    edema_count_cm = pd.DataFrame(
-        confusion_matrix(
-            df["edema"],
-            df["predicted_edema"],
-            labels=EDEMA_LABELS,
-        ),
-        index=pd.Index(EDEMA_LABELS, name="actual"),
-        columns=pd.Index(EDEMA_LABELS, name="predicted"),
-    )
-    edema_norm_cm = pd.DataFrame(
-        confusion_matrix(
-            df["edema"],
-            df["predicted_edema"],
-            labels=EDEMA_LABELS,
-            normalize="true",
-        ),
-        index=pd.Index(EDEMA_LABELS, name="actual"),
-        columns=pd.Index(EDEMA_LABELS, name="predicted"),
-    )
-    actual_present = df["edema"] == "present"
+    df = pd.read_csv(Path(args.input_path))
+    df = df[df["split"] == "testing"].copy()
 
-    severity_mask = (
-        actual_present
-        & df["severity"].notna()
-        & df["predicted_severity"].notna()
-    )
-    severity_count_cm = pd.DataFrame(
-        confusion_matrix(
-            df.loc[severity_mask, "severity"],
-            df.loc[severity_mask, "predicted_severity"],
-            labels=SEVERITY_LABELS,
-        ),
-        index=pd.Index(SEVERITY_LABELS, name="actual"),
-        columns=pd.Index(SEVERITY_LABELS, name="predicted"),
-    )
-    severity_norm_cm = pd.DataFrame(
-        confusion_matrix(
-            df.loc[severity_mask, "severity"],
-            df.loc[severity_mask, "predicted_severity"],
-            labels=SEVERITY_LABELS,
-            normalize="true",
-        ),
-        index=pd.Index(SEVERITY_LABELS, name="actual"),
-        columns=pd.Index(SEVERITY_LABELS, name="predicted"),
-    )
+    output_path = Path(args.output_path)
 
-    # Build Confusion Matrix Chart
-    edema_chart = create_cm_chart(
-        edema_norm_cm,
-        edema_count_cm,
+    evaluate_target(
+        df,
+        "edema",
+        "predicted_edema",
+        EDEMA_LABELS,
         "Edema Confusion Matrix",
-        EDEMA_LABELS,
+        "Edema",
+        output_path,
     )
-    severity_chart = create_cm_chart(
-        severity_norm_cm,
-        severity_count_cm,
+
+    severity_df = df[df["edema"] == "present"]
+    evaluate_target(
+        severity_df,
+        "severity",
+        "predicted_severity",
+        SEVERITY_LABELS,
         "Severity Confusion Matrix",
-        SEVERITY_LABELS,
-    )
-
-    (edema_chart & severity_chart).show()
-
-
-    # Performance Evaluation Tables
-    edema_category_performance = evaluate_categories(
-        df["edema"],
-        df["predicted_edema"],
-        EDEMA_LABELS,
-    )
-    edema_variable_performance = evaluate_variable(
-        df["edema"],
-        df["predicted_edema"],
-        EDEMA_LABELS,
-    )
-
-    severity_category_performance = evaluate_categories(
-        df.loc[severity_mask, "severity"],
-        df.loc[severity_mask, "predicted_severity"],
-        SEVERITY_LABELS,
-    )
-    severity_variable_performance = evaluate_variable(
-        df.loc[severity_mask, "severity"],
-        df.loc[severity_mask, "predicted_severity"],
-        SEVERITY_LABELS,
+        "Severity",
+        output_path,
     )
