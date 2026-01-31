@@ -147,7 +147,7 @@ def log_table(title, df):
 
 
 def log_link(path, label):
-    print(f"{label}: {path.resolve().as_uri()}")
+    print(f"\n{label}: {path.resolve().as_uri()}")
 
 
 def evaluate_target(
@@ -159,6 +159,12 @@ def evaluate_target(
     name,
     output_path,
 ):
+    df = df[[y_true_col, y_pred_col]].dropna().copy()
+    if df.empty:
+        print(f"{name} skipped (no rows to evaluate).")
+        return
+    df[y_true_col] = df[y_true_col].astype(str)
+    df[y_pred_col] = df[y_pred_col].astype(str)
     count_cm = pd.DataFrame(
         confusion_matrix(
             df[y_true_col],
