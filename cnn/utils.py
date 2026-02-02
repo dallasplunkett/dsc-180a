@@ -42,10 +42,12 @@ def get_pred_df(id, bnpp_log, predicted_bnpp_log):
 
 
 def scatter(bnpp_log, predicted_bnpp_log):
-    df = pd.DataFrame({
-        "bnpp_log": np.asarray(list(bnpp_log), dtype=float),
-        "predicted_bnpp_log": np.asarray(list(predicted_bnpp_log), dtype=float),
-    })
+    df = pd.DataFrame(
+        {
+            "bnpp_log": np.asarray(list(bnpp_log), dtype=float),
+            "predicted_bnpp_log": np.asarray(list(predicted_bnpp_log), dtype=float),
+        }
+    )
 
     df = df[np.isfinite(df["bnpp_log"]) & np.isfinite(df["predicted_bnpp_log"])].copy()
 
@@ -104,7 +106,9 @@ def plot_examples_from_df(df, rows, title):
     for i, ax in enumerate(axes):
         ax.imshow(imgs[i], cmap="gray")
         ax.axis("off")
-        ax.set_title(f"ID:{ids[i]}\nBNPP:{bnpp[i]:.1f}\nPredicted BNPP:{predicted_bnpp[i]:.1f}")
+        ax.set_title(
+            f"ID:{ids[i]}\nBNPP:{bnpp[i]:.1f}\nPredicted BNPP:{predicted_bnpp[i]:.1f}"
+        )
     fig.suptitle(title)
     plt.tight_layout()
     return fig

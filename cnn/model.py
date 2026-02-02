@@ -39,7 +39,7 @@ def make_model(name="resnet18"):
     backbone.conv1.weight.data = w
 
     # Remove Classifier head
-    backbone.fc = nn.Identity() # type: ignore
+    backbone.fc = nn.Identity()  # type: ignore
 
     # Add Regression head
     head = nn.Sequential(

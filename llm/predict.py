@@ -1,10 +1,13 @@
-import argparse, json, re
+import argparse
+import json
+import re
 from pathlib import Path
+
 import pandas as pd
+from mlx_lm import generate, load
+from mlx_lm.sample_utils import make_sampler
 from tqdm import tqdm
 
-from mlx_lm import load, generate
-from mlx_lm.sample_utils import make_sampler
 
 def extract_json(text):
     if text is None:
@@ -24,44 +27,39 @@ def extract_json(text):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Predict edema and severity"
-    )
+    parser = argparse.ArgumentParser(description="Predict edema and severity")
     parser.add_argument(
-        "-i", "--input",
+        "-i",
+        "--input",
         dest="input_path",
         required=True,
-        help="Input CSV file path"
+        help="Input CSV file path",
     )
     parser.add_argument(
-        "-o", "--output",
+        "-o",
+        "--output",
         dest="output_path",
         required=True,
-        help="Output CSV file path"
+        help="Output CSV file path",
     )
     parser.add_argument(
-        "-p", "--prompt",
-        dest="prompt_path",
-        required=True,
-        help="Input TXT file path"
+        "-p", "--prompt", dest="prompt_path", required=True, help="Input TXT file path"
     )
     parser.add_argument(
-        "-m", "--model",
+        "-m",
+        "--model",
         dest="model_id",
         required=True,
-        help="HuggingFace model ID (see https://huggingface.co/models?library=mlx for options)"
+        help="HuggingFace model ID (see https://huggingface.co/models?library=mlx for options)",
     )
     parser.add_argument(
-        "-a", "--adapters",
+        "-a",
+        "--adapters",
         dest="adapters_path",
         default=None,
-        help="Path to adapters directory (optional). If omitted, runs base model."
+        help="Path to adapters directory (optional). If omitted, runs base model.",
     )
-    parser.add_argument(
-        "-l", "--limit",
-        type=int,
-        default=None
-    )
+    parser.add_argument("-l", "--limit", type=int, default=None)
     args = parser.parse_args()
 
     input_path = Path(args.input_path)
@@ -75,12 +73,12 @@ if __name__ == "__main__":
     adapter_path = None
     if args.adapters_path:
         adapter_path = str(Path(args.adapters_path))
-    
+
     df = pd.read_csv(input_path)
     if args.limit is not None:
         df = df.head(args.limit).copy()
 
-    model, tokenizer = load(args.model_id, adapter_path=adapter_path) # type: ignore
+    model, tokenizer = load(args.model_id, adapter_path=adapter_path)  # type: ignore
 
     predicted_edema = []
     predicted_severity = []

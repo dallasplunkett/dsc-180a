@@ -34,7 +34,10 @@ class Trainer:
             ys.append(yb.detach().cpu().numpy())
             ps.append(pred.detach().cpu().numpy())
         y, p = np.concatenate(ys), np.concatenate(ps)
-        return {"loss": total_loss / n, "pearson_r": pearsonr(y, p)[0] if len(y) > 1 else np.nan}
+        return {
+            "loss": total_loss / n,
+            "pearson_r": pearsonr(y, p)[0] if len(y) > 1 else np.nan,
+        }
 
     def train(
         self,
