@@ -22,8 +22,8 @@ Tune
 ```bash
 python -m llm.tune \
   --input data/reports/tune.csv \
-  --output llm/tuned_artifact \
-  --prompt data/prompts/final.txt \
+  --output tune_artifact \
+  --prompt data/prompts/binary.txt \
   --model mlx-community/medgemma-4b-it-4bit \
   --iters 1
 ```
@@ -33,10 +33,10 @@ Predict
 ```bash
 python -m llm.predict \
   --input data/reports/tune.csv \
-  --output data/reports/tune_preds.csv \
-  --prompt data/prompts/final.txt \
+  --output debug_preds.csv \
+  --prompt data/prompts/binary.txt \
   --model mlx-community/medgemma-4b-it-4bit \
-  --adapters llm/tuned_artifact/adapters \
+  --adapters tune_artifact/adapters \
   --limit 1
 ```
 
@@ -44,8 +44,8 @@ Eval
 
 ```bash
 python -m llm.eval \
-  --input data/reports/tune_preds.csv \
-  --output llm/tuned_artifact/plots
+  --input debug_preds.csv \
+  --output eval_for_debug_preds
 ```
 
 ## CNN Usage
