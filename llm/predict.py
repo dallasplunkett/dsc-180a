@@ -8,22 +8,45 @@ from mlx_lm import generate, load
 from mlx_lm.sample_utils import make_sampler
 from tqdm import tqdm
 
+EDEMA_LABELS = {"present", "absent"}
+SEVERITY_LABELS = {"severe", "moderate", "mild", "trace", "na"}
 
-def extract_json(text):
-    if text is None:
-        return None
 
-    s = str(text).strip()
-    s = s.replace("<end_of_turn>", "").strip()
+def parse_raw_model_output(raw_text):
+    fallback = {"edema": "na", "severity": "na"}
+    if raw_text is None:
+        return fallback
 
-    m = re.search(r"```(?:json)?\s*(.*?)\s*```", s, flags=re.DOTALL | re.IGNORECASE)
-    if m:
-        s = m.group(1).strip()
+    raw = str(raw_text).strip().replace("<end_of_turn>", "").strip()
+    if not raw:
+        return fallback
+
+    match = re.search(
+        r"```(?:json)?\s*(.*?)\s*```", raw, flags=re.DOTALL | re.IGNORECASE
+    )
+    candidate = match.group(1).strip() if match else raw
+    if '""' in candidate:
+        candidate = candidate.replace('""', '"')
 
     try:
-        return json.loads(s)
+        obj = json.loads(candidate)
     except Exception:
-        return None
+        return fallback
+
+    if not isinstance(obj, dict):
+        return fallback
+
+    normalized = {
+        str(k).strip().lower(): str(v).strip().lower() for k, v in obj.items()
+    }
+
+    edema = normalized.get("edema", "na")
+    severity = normalized.get("severity", "na")
+
+    normalized["edema"] = edema if edema in EDEMA_LABELS else "na"
+    normalized["severity"] = severity if severity in SEVERITY_LABELS else "na"
+
+    return normalized
 
 
 if __name__ == "__main__":
@@ -75,6 +98,8 @@ if __name__ == "__main__":
         adapter_path = str(Path(args.adapters_path))
 
     df = pd.read_csv(input_path)
+    if "edema" in df.columns:
+        df = df[df["edema"] != "unknown"]
     if args.limit is not None:
         df = df.head(args.limit).copy()
 
@@ -83,52 +108,31 @@ if __name__ == "__main__":
     predicted_edema = []
     predicted_severity = []
 
-    raw_outputs = []
+    raw_model_output = []
 
     sampler = make_sampler(0.0)
 
     for report in tqdm(df["report"].astype(str).tolist(), desc="Inferring"):
         prompt = prompt_text.replace("{report_text}", report.strip())
-        if not prompt.endswith("\n"):
-            prompt += "\n"
 
-        out_text = generate(
+        raw = generate(
             model,
             tokenizer,
             prompt=prompt,
             max_tokens=128,
             sampler=sampler,
         )
+        raw_model_output.append(raw)
 
-        raw = str(out_text)
-        raw_outputs.append(raw)
-
-        obj = extract_json(raw)
-
-        if obj is None:
-            predicted_edema.append("parse_error")
-            predicted_severity.append("parse_error")
-            continue
-
-        obj = {str(k).strip().lower(): v for k, v in obj.items()}
-
-        p = str(obj.get("edema", "missing")).strip().lower()
-        s = str(obj.get("severity", "missing")).strip().lower()
-
-        if p != "present":
-            s = "na"
-
-        if p == "present" and s == "na":
-            s = "unknown"
-
-        predicted_edema.append(p)
-        predicted_severity.append(s)
+        predictions = parse_raw_model_output(raw)
+        predicted_edema.append(predictions["edema"])
+        predicted_severity.append(predictions["severity"])
 
     out_df = df.copy()
 
     out_df["predicted_edema"] = predicted_edema
     out_df["predicted_severity"] = predicted_severity
 
-    out_df["raw_model_output"] = raw_outputs
+    out_df["raw_model_output"] = raw_model_output
 
     out_df.to_csv(output_path, index=False)
