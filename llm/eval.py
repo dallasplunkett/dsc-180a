@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix, f1_score
 
-EDEMA_LABELS = ["present", "absent", "unknown"]
-SEVERITY_LABELS = ["severe", "moderate", "mild", "trace", "unknown"]
+EDEMA_LABELS = ["present", "absent"]
+SEVERITY_LABELS = ["severe", "moderate", "mild", "trace"]
 
 
 def create_cm_chart(norm_cm, count_cm, title, labels):
