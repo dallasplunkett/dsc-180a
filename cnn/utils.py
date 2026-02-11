@@ -32,8 +32,8 @@ def get_pred_df(id, bnpp_log, predicted_bnpp_log):
             "predicted_bnpp_log": predicted_bnpp_log,
         }
     )
-    pred_df["bnpp"] = np.exp(pred_df["bnpp_log"])
-    pred_df["predicted_bnpp"] = np.exp(pred_df["predicted_bnpp_log"])
+    pred_df["bnpp"] = np.power(10.0, pred_df["bnpp_log"]) - 1.0
+    pred_df["predicted_bnpp"] = np.power(10.0, pred_df["predicted_bnpp_log"]) - 1.0
     pred_df["abs_diff_log"] = (
         pred_df["bnpp_log"] - pred_df["predicted_bnpp_log"]
     ).abs()
@@ -56,10 +56,10 @@ def scatter(bnpp_log, predicted_bnpp_log):
     lo = float(min(df["bnpp_log"].min(), df["predicted_bnpp_log"].min()))  # pyright: ignore[reportArgumentType]
     hi = float(max(df["bnpp_log"].max(), df["predicted_bnpp_log"].max()))  # pyright: ignore[reportArgumentType]
 
-    x = alt.X("bnpp_log:Q", title="True BNPP (ln)", scale=alt.Scale(domain=[lo, hi]))
+    x = alt.X("bnpp_log:Q", title="True BNPP (log10)", scale=alt.Scale(domain=[lo, hi]))
     y = alt.Y(
         "predicted_bnpp_log:Q",
-        title="Predicted BNPP (ln)",
+        title="Predicted BNPP (log10)",
         scale=alt.Scale(domain=[lo, hi]),
     )
 
