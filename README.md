@@ -66,3 +66,7 @@ Follow the prompts:
 1. For the first prompt __type 2 and press enter__.
 2. For the second prompt __paste your W&B API key and press enter__.
 3. Lastly, __click the link next to the rocket 🚀 emoji__ and watch the CNN run!
+
+## Website
+Our website source code is in the docs folder.
+[Website](https://dallasplunkett.github.io/dsc-180a/)
