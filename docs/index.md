@@ -1,2 +1,22 @@
-# Exploring the Relationship Between LLM-Labeled Radiologist Reports on Pulmonary Edema and CNN-Predicted Clinical Biomarker Levels from X-Ray Images
+# Introduction
+
+Introduction Contents
+
+# Methods
+
+## Dataset
+
+## Convolutional Neural Network
+
+## Large Language Model
+
+# Results
+
+## CNN- Image Signal
+
+## LLM- Language Signal
+
+# Discussion
+
+# Conclusion
 
