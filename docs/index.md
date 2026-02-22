@@ -7,6 +7,18 @@ Authors: Jeru Pail Balares, Dallas Plunkett, Kendall Underwood
 Mentor: Albert Hsaio
 ---
 
+## Table of Contents
+- [Introduction](#introduction)
+- [Methods](#methods)
+  - [Dataset](#dataset)
+  - [Convolutional Neural Network](#convolutional-neural-network)
+  - [Large Language Model](#large-language-model)
+- [Results](#results)
+    - [CNN- Image Signal](#cnn--image-signal)
+    - [LLM- Language Signal](#llm--language-signal)
+- [Discussion](#discussion)
+- [Conclusion](#conclusion)
+
 # Introduction
 
 Introduction Contents
