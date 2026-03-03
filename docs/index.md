@@ -2,7 +2,7 @@
 remote_theme: pages-themes/cayman@v0.2.0
 plugins:
 - jekyll-remote-theme
-title: "Exploring the Relationship Between LLM-Labeled Radiologist Reports on Pulmonary Edema and CNN-Predicted Clinical Biomarker Levels from X-Ray"
+title: "Classification of Pulmonary Edema"
 Description: "Authors-Jeru Pail Balares, Dallas Plunkett, and Kendall Underwood, Mentor: Albert Hsiao
 ---
 
