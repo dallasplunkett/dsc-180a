@@ -42,6 +42,12 @@ To study how imaging, lab values and clinical interpretation relate to each othe
 
  Through EDA, we discovered that BNPP values were highly skewed. To make the data more stable for modeling purposes, we applied a logarithmic transformation, which compresses exrtreme values and makes patterns easier for a model to learn. X-ray images were then resized to a uniform resolution, 256x256 pixels so they could be consistently processed by the neural network.
 
+
+ ![Preview of Radiologist Report and X-ray](images/Website%20Report%20and%20X-ray%20combined.png)
+ <p style="text-align: center;">Figure 1: Preview Radiologist Report and X-Ray Image</p>
+
+
+
 ## Convolutional Neural Network
 
 To estimate BNPP levels from chest X-rays, we used a deep learning model called a concolutional neural network(CNN). Rather than building a model from scratch, we used a pretrained architecture (ResNet) that had already learned general image features from millions of images. This allowed the model to adapt to the learned visual patterns to medical images more efficiently.
