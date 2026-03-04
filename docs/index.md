@@ -63,5 +63,8 @@ We first tested the model using zero-shot learning, meaning it classified report
 
 Due to the dataset having uneven class representation (more cases in one category than the other), we balanced the data so that "edema present" and "edema absent" were equally represented during training. This helps prevent from favoring one outcome simply because it appears more often.
 
+![Methods Architecture FlowChart](images/Website%20Methods%20Image.png)
+ <p style="text-align: center;">Figure 2: Study Design. The LLM and CNN are trained on separate datasets.</p>
+
 # Conclusion
 
