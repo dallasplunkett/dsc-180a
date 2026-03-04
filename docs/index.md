@@ -36,7 +36,9 @@ The convolutional neural network (CNN) was trained to estimate BNPP levels direc
 
 When we compared predicted BNPP values to the true measured values, we found a correlation r=.70. This indicates that the model was avble to capture meaningful patterns from the images.
 
-The distribution od predicted BNPP values closely followed the overall shape of the actual BNPP distribution
+The distribution of predicted BNPP values closely followed the overall shape of the actual BNPP distribution, although the model produced a slightly smoother pattern. This suggests that while the model does not perfectly replicate laboratory measurements, it preserves the overall structure and separation of low versus high BNPP levels. When BNPP values were grouped by edema status, the actual and predicted values showed a similar pattern: cases that were labeled as edema present had consistently higher BNPP levels than those that were labeled absent.
+
+We used a statistical method (Youden's J statistic) to identify an optimal BNPP threshold of approximately 1027, which is higher than the the commonly cited clinical threshold or 400.
 
 ## LLM- Language Signal
 
@@ -50,7 +52,7 @@ To study how imaging, lab values and clinical interpretation relate to each othe
  Through EDA, we discovered that BNPP values were highly skewed. To make the data more stable for modeling purposes, we applied a logarithmic transformation, which compresses exrtreme values and makes patterns easier for a model to learn. X-ray images were then resized to a uniform resolution, 256x256 pixels so they could be consistently processed by the neural network.
 
 
- ![Preview of Radiologist Report and X-ray](images/Website%20Report%20and%20X-ray%20combined.png)
+ ![Preview of Radiologist Report and X-ray](images/Website%20Udated%20Combined%20Image.png)
  <p style="text-align: center;">Figure 1: Preview Radiologist Report and X-Ray Image</p>
 
 
