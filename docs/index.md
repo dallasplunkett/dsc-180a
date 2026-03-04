@@ -39,7 +39,7 @@ To study how imaging, lab values and clinical interpretation relate to each othe
 ## Dataset
  We used two sources of information. The first dataset included chest X-ray images that were paried with BNPP values. The second dataset contains radiologist reports corresponding to the images. These reports included structured labels indicating whether pulmonary edema was described as present or absent.
 
- Through EDA, we discovered that BNPP values were highly skewed. To make the data more stable for modeling purposes, we applied a logarithmic transformation, which compresses exrtreme values and makes patterns easier for a model to learn. X-ray images were then resized to a uniform resolution, 256X256 pixels so they could be consistently processed by the neural network.
+ Through EDA, we discovered that BNPP values were highly skewed. To make the data more stable for modeling purposes, we applied a logarithmic transformation, which compresses exrtreme values and makes patterns easier for a model to learn. X-ray images were then resized to a uniform resolution, 256x256 pixels so they could be consistently processed by the neural network.
 
 ## Convolutional Neural Network
 
@@ -50,6 +50,11 @@ The model was trained to predict BNPP values from the X-ray images. We tested se
 To evaluate the performance of the model, we compared the model's predicted BNPP values and the actual measured BNPP values. We measured accuracy using Mean Absolute Error and Pearson R. Observing MAE allowed us to see how far predictions were from the true values on average. Observing Pearson R allowed us to measure the strength of our model's predicted values and the actual value's relationship.
 
 ## Large Language Model
+Radiology reportd are written in natural language and can vary in wording. To standardize this information, we sued a large language model trained specifically on medical text. For our project we used MedGemma 27B. 
+
+We first tested the model using zero-shot learning, meaning it classified reports using and instructed prompt. We then finetuned the model using labeled radiology reports to improve performance. To make this process efficient, we implemented a tecnique called Low-Rank Adaptation (LoRA), which allows large model to adapt without retraining parameters.
+
+Due to the dataset having uneven class representation (more cases in one category than the other), we balanced the data so that "edema present" and "edema absent" were equally represented during training. This helps prevent from favoring one outcome simply because it appears more often.
 
 # Discussion
 
