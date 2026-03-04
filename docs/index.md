@@ -17,6 +17,8 @@ description: "Authors: Jeru Paul Balares, Dallas Plunkett, and Kendall Underwood
   - [Large Language Model](#large-language-model)
 - [Conclusion](#conclusion)
 
+## Need to add links to poster and paper
+
 # Introduction
 
 When the heart is under stress, fluid can build up in the lungs, a condition called pulmonary edema. Doctors often look for signs of this on chest X-rays and by measuring a blood marker called NT-proBNP (often shortened to BNPP), which tends to rise when the heart is struggling. While a BNPP level around 400 is commonly used as a warning sign, that number alone does not give a definite diagnosis.
@@ -30,6 +32,11 @@ In this project, we compare two different signals of pulmonary edema, one that i
 After training our CNN and LLM models, we comapred BNPP values predicted from chest X-rays and edema classifications extracted from radiologty reports. This allowed us to study how image-based biomarker predictions align with radiologist's written assessments and to explore whether commonly used BNPP thresholds reflect clinicians actually document in practice.
 
 ## CNN- Image Signal
+The convolutional neural network (CNN) was trained to estimate BNPP levels directly from chest ray images. Among the architectures testes ResNet34 performed the best.
+
+When we compared predicted BNPP values to the true measured values, we found a correlation r=.70. This indicates that the model was avble to capture meaningful patterns from the images.
+
+The distribution od predicted BNPP values closely followed the overall shape of the actual BNPP distribution
 
 ## LLM- Language Signal
 
@@ -67,4 +74,5 @@ Due to the dataset having uneven class representation (more cases in one categor
  <p style="text-align: center;">Figure 2: Study Design. The LLM and CNN are trained on separate datasets.</p>
 
 # Conclusion
+
 
