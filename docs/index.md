@@ -27,6 +27,8 @@ In this project, we compare two different signals of pulmonary edema, one that i
 
 # Results
 
+After training our CNN and LLM models, we comapred BNPP values predicted from chest X-rays and edema classifications extracted from radiologty reports. This allowed us to study how image-based biomarker predictions align with radiologist's written assessments and to explore whether commonly used BNPP thresholds reflect clinicians actually document in practice.
+
 ## CNN- Image Signal
 
 ## LLM- Language Signal
