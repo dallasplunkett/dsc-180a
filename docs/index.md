@@ -3,7 +3,7 @@ remote_theme: pages-themes/cayman@v0.2.0
 plugins:
 - jekyll-remote-theme
 title: "Classification of Pulmonary Edema"
-description: "Authors-Jeru Pail Balares, Dallas Plunkett, and Kendall Underwood, Mentor-Albert Hsiao"
+description: "Authors: Jeru Paul Balares, Dallas Plunkett, and Kendall Underwood, Mentor: Albert Hsiao"
 ---
 
 ## Table of Contents
