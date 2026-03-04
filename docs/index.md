@@ -15,7 +15,6 @@ description: "Authors: Jeru Paul Balares, Dallas Plunkett, and Kendall Underwood
   - [Dataset](#dataset)
   - [Convolutional Neural Network](#convolutional-neural-network)
   - [Large Language Model](#large-language-model)
-- [Discussion](#discussion)
 - [Conclusion](#conclusion)
 
 # Introduction
@@ -50,13 +49,11 @@ The model was trained to predict BNPP values from the X-ray images. We tested se
 To evaluate the performance of the model, we compared the model's predicted BNPP values and the actual measured BNPP values. We measured accuracy using Mean Absolute Error and Pearson R. Observing MAE allowed us to see how far predictions were from the true values on average. Observing Pearson R allowed us to measure the strength of our model's predicted values and the actual value's relationship.
 
 ## Large Language Model
-Radiology reportd are written in natural language and can vary in wording. To standardize this information, we sued a large language model trained specifically on medical text. For our project we used MedGemma 27B. 
+Radiology reportd are written in natural language and can vary in wording. To standardize this information, we used a large language model trained specifically on medical text. For our project we used MedGemma 27B. 
 
 We first tested the model using zero-shot learning, meaning it classified reports using and instructed prompt. We then finetuned the model using labeled radiology reports to improve performance. To make this process efficient, we implemented a tecnique called Low-Rank Adaptation (LoRA), which allows large model to adapt without retraining parameters.
 
 Due to the dataset having uneven class representation (more cases in one category than the other), we balanced the data so that "edema present" and "edema absent" were equally represented during training. This helps prevent from favoring one outcome simply because it appears more often.
-
-# Discussion
 
 # Conclusion
 
