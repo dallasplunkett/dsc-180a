@@ -19,4 +19,5 @@ wandb/
 
 README.md
 
-adhoc.py
+scripts.py
+plots/
