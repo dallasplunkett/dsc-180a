@@ -19,6 +19,4 @@ wandb/
 
 README.md
 
-llm/_*
-notes.md
 adhoc.py
