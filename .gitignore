@@ -15,9 +15,3 @@ checkpoints/
 
 data/
 wandb/
-
-llm/_*
-
-notes.md
-adhoc.py
-plots/
