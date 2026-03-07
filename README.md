@@ -1,19 +1,27 @@
 # DSC 180 Group B21-1
 
-Dallas Plunkett, Kendall Underwood, Jeru Balares
+Contributors: Dallas Plunkett, Kendall Underwood, and Jeru Balares.
+
+Project Website: https://dallasplunkett.github.io/dsc-180a/, with source files in `/docs`.
 
 ## Setup
+
+Environment
 
 ```bash
 git clone https://github.com/dallasplunkett/dsc-180a.git
 cd dsc-180a
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Download a subset of the [data](https://drive.google.com/file/d/1tyKNXRUkTtuYiNe5uwmFpqZP5C7FqDni/view?usp=sharing) and place it in the project's root directory (i.e. `dsc-180a/data`).
+Data
+
+1. Subset Download: https://drive.google.com/file/d/1tyKNXRUkTtuYiNe5uwmFpqZP5C7FqDni/view?usp=sharing.
+2. Once downloaded, unzip it.
+3. Place unzipped `data` directory into the project's root directory (i.e. `dsc-180a/data`).
 
 ## LLM Usage
 
@@ -66,7 +74,3 @@ Follow the prompts:
 1. For the first prompt __type 2 and press enter__.
 2. For the second prompt __paste your W&B API key and press enter__.
 3. Lastly, __click the link next to the rocket 🚀 emoji__ and watch the CNN run!
-
-## Website
-Our website source code is in the docs folder.
-[Website](https://dallasplunkett.github.io/dsc-180a/)
