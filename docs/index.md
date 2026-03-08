@@ -48,6 +48,8 @@ We used a statistical method (Youden's J statistic) to identify an optimal BNPP 
 BNPP increases with each, so we wanted to examine values within age groups. Across the groups, lables of present edema showed consistently higher BNPP compared to absent labels.
 
 
+![Age](images/Website%20Age%20distribution.png)
+ <p style="text-align: center;">Figure 2: Age-straified BNPP distributions</p>
 
 
 
