@@ -19,7 +19,7 @@ description: "Authors: Jeru Paul Balares, Dallas Plunkett, and Kendall Underwood
 
 ## Project Resources
 - [Poster](images/poster%20(2).pdf)
-- [Report]
+- [Report](images/DSC_Capstone_Q2_Report-1.pdf)
 
 # Introduction
 
