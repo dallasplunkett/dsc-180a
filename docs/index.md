@@ -38,6 +38,10 @@ When we compared predicted BNPP values to the true measured values, we found a c
 
 The distribution of predicted BNPP values closely followed the overall shape of the actual BNPP distribution, although the model produced a slightly smoother pattern. This suggests that while the model does not perfectly replicate laboratory measurements, it preserves the overall structure and separation of low versus high BNPP levels. When BNPP values were grouped by edema status, the actual and predicted values showed a similar pattern: cases that were labeled as edema present had consistently higher BNPP levels than those that were labeled absent.
 
+
+![CNN Results](images/Website%20CNN%20Image.png)
+ <p style="text-align: center;">Figure 2: Predicted versus actual BNPP values (left) anbd their distributions (right).</p>
+
 We used a statistical method (Youden's J statistic) to identify an optimal BNPP threshold of approximately 1027, which is higher than the the commonly cited clinical threshold or 400. This suggests that the standard 400 threshold might be conservative in this dataset.
 
 
@@ -47,6 +51,10 @@ To help interpret radiology reports, we used a large language model (LLM) to cla
 
 
 The confusion matrices show that fine-tuning imporved performance. The fine tuned model correctly identified the vast majority of both present and absent cases, while helping redduce misclassifications compared to the untuned version. Because the origincal dataset had unevent representation between classes, balancing training data improved the model's ability to recognize both categories fairly. Overall, the LLM sucessfully converted radiology reports into reliable edema classifications.
+
+
+![LLM Confusion Matrices](images/Website%20Confusion%20Matrix.png)
+ <p style="text-align: center;">Figure 2: Confusion matrices comparing LLM results without tuning (left) and balanced tuning (right). Percent values show how each actual edema label was distributed acorss predictions. Counts appear below in parenthesis.</p>
 
 
 # Methods
