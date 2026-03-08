@@ -17,35 +17,47 @@ description: "Authors: Jeru Paul Balares, Dallas Plunkett, and Kendall Underwood
   - [Large Language Model](#large-language-model)
 - [Conclusion](#conclusion)
 
-## Need to add links to poster and paper
+## Project Resources
+- [Poster](images/poster%20(2).pdf)
+- [Report]
 
 # Introduction
 
 When the heart is under stress, fluid can build up in the lungs, a condition called pulmonary edema. Doctors often look for signs of this on chest X-rays and by measuring a blood marker called NT-proBNP (often shortened to BNPP), which tends to rise when the heart is struggling. While a BNPP level around 400 is commonly used as a warning sign, that number alone does not give a definite diagnosis.
 
-In recent years, artifical intelligence models have been developed to estimate BNPP levels directly from chest X-ray images. In light of these advancements, a question is raised: do these images-based predictions actually match what doctors identify in their written radiology reports?
 
-In this project, we compare two different signals of pulmonary edema, one that is derived from medical images and one that is extracted from clinical language. By studying how closely these signals align, we aim to better understand how imaging, lab values, and clinical interpretation fit together. We also aimed to see whether commonly used threshoolds reflect what doctors see in practice.
+In recent years, artificial intelligence models have been developed to estimate BNPP levels directly from chest X-ray images. In light of these advancements, a question is raised: do these images-based predictions actually match what doctors identify in their written radiology reports?
+
+
+In this project, we compare two different signals of pulmonary edema, one that is derived from medical images and one that is extracted from clinical language. By studying how closely these signals align, we aim to better understand how imaging, lab values, and clinical interpretation fit together. We also aimed to see whether commonly used thresholds reflect what doctors see in practice.
+
 
 # Results
 
-After training our CNN and LLM models, we comapred BNPP values predicted from chest X-rays and edema classifications extracted from radiologty reports. This allowed us to study how image-based biomarker predictions align with radiologist's written assessments and to explore whether commonly used BNPP thresholds reflect clinicians actually document in practice.
+After training our CNN and LLM models, we compared BNPP values predicted from chest X-rays and edema classifications extracted from radiology reports. This allowed us to study how image-based biomarker predictions align with radiologist's written assessments and to explore whether commonly used BNPP thresholds reflect what clinicians actually document in practice.
+
 
 ## CNN- Image Signal
-The convolutional neural network (CNN) was trained to estimate BNPP levels directly from chest ray images. Among the architectures testes ResNet34 performed the best.
+The convolutional neural network (CNN) was trained to estimate BNPP levels directly from chest ray images. Among the architectures tested, ResNet34 performed the best.
 
-When we compared predicted BNPP values to the true measured values, we found a correlation r=.70. This indicates that the model was avble to capture meaningful patterns from the images.
+
+When we compared predicted BNPP values to the true measured values, we found a correlation r = .70. This indicates that the model was able to capture meaningful patterns from the images.
+
 
 The distribution of predicted BNPP values closely followed the overall shape of the actual BNPP distribution, although the model produced a slightly smoother pattern. This suggests that while the model does not perfectly replicate laboratory measurements, it preserves the overall structure and separation of low versus high BNPP levels. When BNPP values were grouped by edema status, the actual and predicted values showed a similar pattern: cases that were labeled as edema present had consistently higher BNPP levels than those that were labeled absent.
 
 
+
 ![CNN Results](images/Website%20CNN%20Image.png)
- <p style="text-align: center;">Figure 2: Predicted versus actual BNPP values (left) anbd their distributions (right).</p>
+ <p style="text-align: center;">Figure 1: Predicted versus actual BNPP values (left) anbd their distributions (right).</p>
 
-We used a statistical method (Youden's J statistic) to identify an optimal BNPP threshold of approximately 1027, which is higher than the the commonly cited clinical threshold or 400. This suggests that the standard 400 threshold might be conservative in this dataset.
+We used a statistical method (Youden's J statistic) to identify an optimal BNPP threshold of approximately 1027, which is higher than the commonly cited clinical threshold or 400. This suggests that the standard 400 threshold might be conservative in this dataset.
 
 
-BNPP increases with each, so we wanted to examine values within age groups. Across the groups, lables of present edema showed consistently higher BNPP compared to absent labels.
+
+
+BNPP increases with each, so we wanted to examine values within age groups. Across the groups, labels of present edema showed consistently higher BNPP compared to absent labels.
+
 
 
 ![Age](images/Website%20Age%20distribution.png)
@@ -55,48 +67,61 @@ BNPP increases with each, so we wanted to examine values within age groups. Acro
 
 
 ## LLM- Language Signal
-To help interpret radiology reports, we used a large language model (LLM) to classify whether pilmonary edema was described as present or absent. We compared two approaches. First using the model with any additional tuning, and fine tuning the model with a balanced dataset (50% prsent and 50% absent). The balanced tuning strategy performed best achieving a AUC of .79. This means that the model was able to distinguish between edema present and absent with reasonably strong accuracy.
+To help interpret radiology reports, we used a large language model (LLM) to classify whether pulmonary edema was described as present or absent. We compared two approaches. First using the model with any additional tuning, and fine tuning the model with a balanced dataset (50% present and 50% absent). The balanced tuning strategy performed best achieving an AUC of .79. This means that the model was able to distinguish between edema present and absent with reasonably strong accuracy.
 
 
-The confusion matrices show that fine-tuning imporved performance. The fine tuned model correctly identified the vast majority of both present and absent cases, while helping redduce misclassifications compared to the untuned version. Because the origincal dataset had unevent representation between classes, balancing training data improved the model's ability to recognize both categories fairly. Overall, the LLM sucessfully converted radiology reports into reliable edema classifications.
+
+
+The confusion matrices show that fine-tuning improved performance. The fine tuned model correctly identified the vast majority of both present and absent cases, while helping reduce misclassifications compared to the untuned version. Because the original dataset had unevent representation between classes, balancing training data improved the model's ability to recognize both categories fairly. Overall, the LLM successfully converted radiology reports into reliable edema classifications.
+
 
 
 ![LLM Confusion Matrices](images/Website%20Confusion%20Matrix.png)
- <p style="text-align: center;">Figure 2: Confusion matrices comparing LLM results without tuning (left) and balanced tuning (right). Percent values show how each actual edema label was distributed acorss predictions. Counts appear below in parenthesis.</p>
+ <p style="text-align: center;">Figure 3: Confusion matrices comparing LLM results without tuning (left) and balanced tuning (right). Percent values show how each actual edema label was distributed across predictions. Counts appear below in parenthesis.</p>
 
 
 # Methods
-To study how imaging, lab values and clinical interpretation relate to each other, we worked with two connected datsets: one based on chest X-rays and blood test results, and another based on radiologist written reports.
+To study how imaging, lab values and clinical interpretation relate to each other, we worked with two connected datasets: one based on chest X-rays and blood test results, and another based on radiologist written reports.
 
 ## Dataset
- We used two sources of information. The first dataset included chest X-ray images that were paried with BNPP values. The second dataset contains radiologist reports corresponding to the images. These reports included structured labels indicating whether pulmonary edema was described as present or absent.
+We used two sources of information. The first dataset included chest X-ray images that were paired with BNPP values. The second dataset contains radiologist reports corresponding to the images. These reports included structured labels indicating whether pulmonary edema was described as present or absent.
 
- Through EDA, we discovered that BNPP values were highly skewed. To make the data more stable for modeling purposes, we applied a logarithmic transformation, which compresses exrtreme values and makes patterns easier for a model to learn. X-ray images were then resized to a uniform resolution, 256x256 pixels so they could be consistently processed by the neural network.
+
+Through EDA, we discovered that BNPP values were highly skewed. To make the data more stable for modeling purposes, we applied a logarithmic transformation, which compresses extreme values and makes patterns easier for a model to learn. X-ray images were then resized to a uniform resolution, 256x256 pixels so they could be consistently processed by the neural network.
+
 
 
  ![Preview of Radiologist Report and X-ray](images/Website%20Udated%20Combined%20Image.png)
- <p style="text-align: center;">Figure 1: Preview Radiologist Report and X-Ray Image</p>
+ <p style="text-align: center;">Figure 4: Preview Radiologist Report and X-Ray Image</p>
 
 
 
 ## Convolutional Neural Network
 
-To estimate BNPP levels from chest X-rays, we used a deep learning model called a concolutional neural network(CNN). Rather than building a model from scratch, we used a pretrained architecture (ResNet) that had already learned general image features from millions of images. This allowed the model to adapt to the learned visual patterns to medical images more efficiently.
+To estimate BNPP levels from chest X-rays, we used a deep learning model called a convolutional neural network(CNN). Rather than building a model from scratch, we used a pretrained architecture (ResNet) that had already learned general image features from millions of images. This allowed the model to adapt the learned visual patterns to medical images more efficiently.
 
-The model was trained to predict BNPP values from the X-ray images. We tested several versions of the ResNet architectur and selected ResNet34 since it had the best performance.
+
+The model was trained to predict BNPP values from the X-ray images. We tested several versions of the ResNet architecture and selected ResNet34 since it had the best performance.
+
 
 To evaluate the performance of the model, we compared the model's predicted BNPP values and the actual measured BNPP values. We measured accuracy using Mean Absolute Error and Pearson R. Observing MAE allowed us to see how far predictions were from the true values on average. Observing Pearson R allowed us to measure the strength of our model's predicted values and the actual value's relationship.
 
+
 ## Large Language Model
-Radiology reportd are written in natural language and can vary in wording. To standardize this information, we used a large language model trained specifically on medical text. For our project we used MedGemma 27B. 
+Radiology reports are written in natural language and can vary in wording. To standardize this information, we used a large language model trained specifically on medical text. For our project we used MedGemma 27B.
 
-We first tested the model using zero-shot learning, meaning it classified reports using and instructed prompt. We then finetuned the model using labeled radiology reports to improve performance. To make this process efficient, we implemented a tecnique called Low-Rank Adaptation (LoRA), which allows large model to adapt without retraining parameters.
 
-Due to the dataset having uneven class representation (more cases in one category than the other), we balanced the data so that "edema present" and "edema absent" were equally represented during training. This helps prevent from favoring one outcome simply because it appears more often.
+We first tested the model using zero-shot learning, meaning it classified reports using an instructed prompt. We then finetuned the model using labeled radiology reports to improve performance. To make this process efficient, we implemented a technique called Low-Rank Adaptation (LoRA), which allows large models to adapt without retraining parameters.
+
+
+Due to the dataset having uneven class representation (more cases in one category than the other), we balanced the data so that "edema present" and "edema absent" were equally represented during training. This helps prevention of favoring one outcome simply because it appears more often.
+
 
 ![Methods Architecture FlowChart](images/Website%20Methods%20Image.png)
- <p style="text-align: center;">Figure 2: Study Design. The LLM and CNN are trained on separate datasets.</p>
+ <p style="text-align: center;">Figure 5: Study Design. The LLM and CNN are trained on separate datasets.</p>
 
 # Conclusion
+
+Our project demonstrates that a LLM can generate accurate edema labels from radiology reports that align with heart stress measures. By comparing edema labels with BNPP estimates, we demonstrated a way to evaluate edema labeling quality without requiring a radiologist's expert judgement. The approach that we used offers a method for studying edema while staying grounded in physiology.
 
 
