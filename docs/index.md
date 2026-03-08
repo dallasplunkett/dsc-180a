@@ -38,9 +38,15 @@ When we compared predicted BNPP values to the true measured values, we found a c
 
 The distribution of predicted BNPP values closely followed the overall shape of the actual BNPP distribution, although the model produced a slightly smoother pattern. This suggests that while the model does not perfectly replicate laboratory measurements, it preserves the overall structure and separation of low versus high BNPP levels. When BNPP values were grouped by edema status, the actual and predicted values showed a similar pattern: cases that were labeled as edema present had consistently higher BNPP levels than those that were labeled absent.
 
-We used a statistical method (Youden's J statistic) to identify an optimal BNPP threshold of approximately 1027, which is higher than the the commonly cited clinical threshold or 400.
+We used a statistical method (Youden's J statistic) to identify an optimal BNPP threshold of approximately 1027, which is higher than the the commonly cited clinical threshold or 400. This suggests that the standard 400 threshold might be conservative in this dataset.
+
+
 
 ## LLM- Language Signal
+To help interpret radiology reports, we used a large language model (LLM) to classify whether pilmonary edema was described as present or absent. We compared two approaches. First using the model with any additional tuning, and fine tuning the model with a balanced dataset (50% prsent and 50% absent). The balanced tuning strategy performed best achieving a AUC of .79. This means that the model was able to distinguish between edema present and absent with reasonably strong accuracy.
+
+
+The confusion matrices show that fine-tuning imporved performance. The fine tuned model correctly identified the vast majority of both present and absent cases, while helping redduce misclassifications compared to the untuned version. Because the origincal dataset had unevent representation between classes, balancing training data improved the model's ability to recognize both categories fairly. Overall, the LLM sucessfully converted radiology reports into reliable edema classifications.
 
 
 # Methods
