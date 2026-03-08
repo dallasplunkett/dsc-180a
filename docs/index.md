@@ -45,6 +45,12 @@ The distribution of predicted BNPP values closely followed the overall shape of 
 We used a statistical method (Youden's J statistic) to identify an optimal BNPP threshold of approximately 1027, which is higher than the the commonly cited clinical threshold or 400. This suggests that the standard 400 threshold might be conservative in this dataset.
 
 
+BNPP increases with each, so we wanted to examine values within age groups. Across the groups, lables of present edema showed consistently higher BNPP compared to absent labels.
+
+
+
+
+
 
 ## LLM- Language Signal
 To help interpret radiology reports, we used a large language model (LLM) to classify whether pilmonary edema was described as present or absent. We compared two approaches. First using the model with any additional tuning, and fine tuning the model with a balanced dataset (50% prsent and 50% absent). The balanced tuning strategy performed best achieving a AUC of .79. This means that the model was able to distinguish between edema present and absent with reasonably strong accuracy.
